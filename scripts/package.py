@@ -130,6 +130,14 @@ def build(files: list[Path], out: Path) -> None:
 
 
 def main() -> int:
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--scan-only", action="store_true", help="只做敏感内容扫描，不打包")
+    args = parser.parse_args()
+    if args.scan_only:
+        hits = scan([Path(p) for p in INCLUDE_FILES] )
+        return 1 if hits else 0
+
     parser = argparse.ArgumentParser(description="打绿色版压缩包")
     parser.add_argument("--check", action="store_true", help="只检查，不生成")
     parser.add_argument("--out", default="", help="输出文件名（默认 dist/卿音-<版本>-portable.zip）")

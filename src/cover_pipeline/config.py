@@ -44,6 +44,9 @@ def load_config(preset: str | None = None, overrides: dict[str, Any] | None = No
     cfg = deep_merge(cfg, _read_yaml(CONFIG_DIR / "local.yaml"))
     if overrides:
         cfg = deep_merge(cfg, overrides)
+    problems = validate(cfg)
+    if problems:
+        raise ConfigError("配置有问题：\n  - " + "\n  - ".join(problems))
     return cfg
 
 

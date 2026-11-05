@@ -241,9 +241,15 @@ def fit_to_probe(probe: dict[str, Any], plans: list[dict[str, Any]] | None = Non
     显存刚好落在某套方案的区间里、且不是边界情况时，返回 None（用现成方案即可）。
     """
     plans = plans if plans is not None else load_plans()
-    vram = _max_vram(probe)
-    if not vram:
-        vram = float((probe.get("gpu") or {}).get("vram_gb") or 0)
+    vram = 0.0
+    try:
+        vram = float(_max_vram(probe) or 0)
+    except Exception:
+        gpu = probe.get("gpu")
+        if isinstance(gpu, dict):
+            vram = float(gpu.get("vram_gb") or 0)
+        elif isinstance(gpu, list) and gpu:
+            vram = float((gpu[0] or {}).get("vram_gb") or 0)
     if vram <= 0:
         return None
     usable = [p for p in plans if (p.get("for") or {}).get("gpu_required", True)]

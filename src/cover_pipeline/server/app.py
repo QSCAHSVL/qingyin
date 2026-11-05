@@ -1358,6 +1358,40 @@ def _category_for(path: str) -> str:
     return "系统"
 
 
+_EXTRA_PATHS: dict[str, Any] = {
+    "/api/assets": {"get": {"summary": "列出可安装的组件清单", "responses": {"200": {"description": "组件列表"}}}},
+    "/api/assets/install": {"post": {"summary": "安装指定组件", "responses": {"200": {"description": "任务对象"}}}},
+    "/api/backup": {"post": {"summary": "打包备份数据目录", "responses": {"200": {"description": "任务对象"}}}},
+    "/api/disclaimer": {"get": {"summary": "读取免责声明确认状态", "responses": {"200": {"description": "确认状态"}}}},
+    "/api/disclaimer/ack": {"post": {"summary": "确认已阅读免责声明", "responses": {"200": {"description": "确认结果"}}}},
+    "/api/fs/list": {
+        "get": {
+            "summary": "列出目录内容（文件浏览器）",
+            "parameters": [
+                {"name": "path", "in": "query", "required": False, "schema": {"type": "string"}},
+                {"name": "ext", "in": "query", "required": False, "schema": {"type": "string"}},
+            ],
+            "responses": {"200": {"description": "目录条目"}},
+        }
+    },
+    "/api/pick-folder": {"post": {"summary": "调系统文件夹选择框（可选 dry_run）", "responses": {"200": {"description": "选中的路径或降级提示"}}}},
+    "/api/jobs/{job_id}/retry": {"post": {"summary": "重跑失败的任务", "responses": {"200": {"description": "任务对象"}}}},
+    "/api/logs": {"get": {"summary": "列出日志文件", "responses": {"200": {"description": "日志列表"}}}},
+    "/api/logs/tail": {
+        "get": {
+            "summary": "读取某个日志的尾部",
+            "parameters": [
+                {"name": "name", "in": "query", "required": True, "schema": {"type": "string"}},
+                {"name": "lines", "in": "query", "required": False, "schema": {"type": "integer"}},
+            ],
+            "responses": {"200": {"description": "日志行"}},
+        }
+    },
+    "/api/settings/send": {"post": {"summary": "保存外发配置（默认关闭）", "responses": {"200": {"description": "保存结果"}}}},
+    "/api/train/config": {"get": {"summary": "读取训练配置与命令模板", "responses": {"200": {"description": "训练配置"}}}},
+}
+
+
 def openapi_spec() -> dict[str, Any]:
     """手写的接口描述，给 /docs 页和外部调用者看。"""
     def ok(desc: str) -> dict[str, Any]:
@@ -1507,6 +1541,8 @@ def openapi_spec() -> dict[str, Any]:
                 }
             },
                 }
+
+    paths.update(_EXTRA_PATHS)
 
     for path, entry in paths.items():
         tag = _category_for(path)

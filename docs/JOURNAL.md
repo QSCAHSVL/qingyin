@@ -170,3 +170,35 @@ auto 规则是「有本机 UVR 就复用；磁盘 <6G 或显存 <5G 选 Demucs�
 系统对话框降级成弹窗里的一个按钮，并给它加了 TopMost 透明 owner（否则会躲在浏览器后面）。
 顺手统一了输入框和按钮高度（之前 `small` 按钮比输入框矮一截）。
 
+
+### 十二、03:5x 第 7 轮：`app.js` 拆包（1917 行 → 15 个 ES module）
+
+第 6 轮把后端 `server/app.py` 拆干净了，这轮动前端。目标是**行为一字不变**，所以定了个死规矩：
+先按 `/* ---- 段落 ---- */` 的天然分界切片、**逐段原样搬运**，只改「必须改的东西」，不顺手重写任何函数。
+
+只动了三处共享状态，因为它们本来跨段乱用：
+
+- `connFailures`：`api()` 里要清零、首页要加一 → 收进 `core.js` 的 `net.connFailures`；
+- `libKind/libPage/libPages/libSelected`：资源库状态被路由和事件绑定直接读写 → 收进 `library.js` 的
+  `libState` 对象（对象属性可跨模块写，`export let` 不行）；
+- `singJobId`：任务页 `watchJob` 完成后要写回翻唱页 → 翻唱页导出一个 `setSingJobId()`，别跨模块改 `let`。
+
+跨模块调用一律显式 `import`。唯一会成环的是「首页要 `go()`、路由要 `loadHome()`」，
+于是加了个 10 行的 `nav.js` 做回调注册（路由 `setNavigator(go)`，页面只 `import { go }`），
+比用 ESM 循环依赖硬扛清楚。
+
+**验收拿了两套独立证据对账**（照第 6 轮那套思路）：
+
+1. 行为基线：同一台机器上把旧单文件版换回去 → 无头 Chrome 逐页 dump DOM → 再换新拆分版 dump 一遍 →
+   `Compare-Object`。10 个页面标题全一致，字节数只差 +15（`type="module"` 那 14 个字符 + `v=9→v=10`），
+   唯一真实差异是任务页那条「已跑 12469s / 12476s」的实时计时——两次 dump 中间隔了 7 秒。
+2. 静态检查：`scripts/check_frontend.py`（语法 → 临时目录里放 `package.json{type:module}` 再 `node --check`，
+   否则 Node 拿 ESM 当 CommonJS 直接判语法错；引用路径必须存在；`import` 的名字必须在目标模块真 `export` 了）。
+   脚本自己用三个负例验过：删掉一个 `export`、改错一个 import 路径、加一行坏语法，都能抓到。
+
+CI 里原来那条 `Get-ChildItem static/*.js | node --check` 拆包后既漏子目录、又会把 ESM 判成语法错，
+换成 `check_frontend.py --syntax`（阻断）+ `--static`（先非阻断）。
+
+一个坑记下来：`git status` 里 `app.js` 显示 `M`、其余都是 `??`，`git add` 时必须显式带上
+`static/pages/ static/ui/ static/core.js static/nav.js static/router.js`，否则打包只会带上旧的 `app.js`，
+页面一打开就是 `import` 404。

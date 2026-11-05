@@ -30,15 +30,12 @@ jobs:
         env:
           PYTHONPATH: src
         run: python -m unittest discover -s tests -t .
-      - name: JS syntax
-        shell: pwsh
-        run: |
-          $bad = 0
-          Get-ChildItem src/cover_pipeline/server/static/*.js | ForEach-Object {
-            node --check $_.FullName
-            if ($LASTEXITCODE -ne 0) { $bad = 1 }
-          }
-          if ($bad -ne 0) { exit 1 }
+      - name: JS syntax (ESM，拆包后子目录也一起查)
+        run: python scripts/check_frontend.py --syntax
+
+      - name: Frontend static checks (non-blocking)
+        continue-on-error: true
+        run: python scripts/check_frontend.py --static
 
       - name: Packaging self-check
         env:

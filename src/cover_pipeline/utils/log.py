@@ -49,6 +49,16 @@ def disable_file() -> None:
             _file = None
 
 
+def _redact(text: str) -> str:
+    """把本机用户目录换成 ~，避免日志外传泄露路径。"""
+    import os
+
+    home = os.path.expanduser("~")
+    if home and home in text:
+        text = text.replace(home, "~")
+    return text
+
+
 def _emit(tag: str, message: str, level: int) -> None:
     if level < _current:
         return
@@ -58,7 +68,7 @@ def _emit(tag: str, message: str, level: int) -> None:
     print(line, file=stream, flush=True)
     if _file is not None:
         try:
-            _file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {line}\n")
+            _file.write(_redact(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {line}\n"))
             _file.flush()
         except Exception:
             pass

@@ -456,6 +456,19 @@ class AppState:
         job = self.jobs.submit("install", f"安装组件：{target.get('label')}", task, payload=payload)
         return job.as_dict()
 
+    # ---------------------------------------------------------------- 免责
+
+    def disclaimer(self) -> dict[str, Any]:
+        flag = cfg_mod.ROOT / ".disclaimer-ack"
+        return {"acknowledged": flag.exists(), "version": "1"}
+
+    def ack_disclaimer(self) -> dict[str, Any]:
+        import time as _time
+
+        flag = cfg_mod.ROOT / ".disclaimer-ack"
+        flag.write_text(_time.strftime("%Y-%m-%d %H:%M:%S"), encoding="utf-8")
+        return {"ok": True}
+
     # ---------------------------------------------------------------- 日志
 
     def logs_list(self) -> dict[str, Any]:
@@ -955,6 +968,8 @@ def make_handler(state: AppState):
                     return self._json(state.train_preview({
                         "data": (query.get("data") or [""])[0],
                     }))
+                if path == "/api/disclaimer":
+                    return self._json(state.disclaimer())
                 if path == "/api/logs":
                     return self._json(state.logs_list())
                 if path == "/api/logs/tail":
@@ -1114,6 +1129,8 @@ def make_handler(state: AppState):
                     except PermissionError as exc:
                         return self._json({"error": str(exc)}, 403)
                     return self._json({"ok": True})
+                if path == "/api/disclaimer/ack":
+                    return self._json(state.ack_disclaimer())
                 if path == "/api/pick-folder":
                     return self._json(state.pick_folder(payload))
                 if path == "/api/train":

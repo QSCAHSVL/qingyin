@@ -64,12 +64,13 @@
         <h3>给外部 Agent 用</h3>
         <div class="actions">
           <button class="ghost small" id="agent-copy">复制 Key</button>
+          <button class="ghost small" id="agent-reveal">显示</button>
         </div>
       </div>
       <div class="agent-grid">
         <label class="field">
           Key
-          <input id="agent-key" readonly placeholder="读取中…" />
+          <input id="agent-key" type="password" readonly placeholder="读取中…" />
         </label>
         <div class="agent-meta" id="agent-hint"></div>
       </div>
@@ -206,6 +207,12 @@ loadSpec();
   } catch (err) {
     document.getElementById("agent-key").placeholder = "读取失败：" + err.message;
   }
+  document.getElementById("agent-reveal").addEventListener("click", () => {
+    const box = document.getElementById("agent-key");
+    const on = box.type === "password";
+    box.type = on ? "text" : "password";
+    document.getElementById("agent-reveal").textContent = on ? "隐藏" : "显示";
+  });
   document.getElementById("agent-copy").addEventListener("click", async () => {
     const value = document.getElementById("agent-key").value;
     try {

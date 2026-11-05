@@ -6,6 +6,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "src/cover_pipeline/server/app.py"
+# 接口文档单独一个模块（第 6 轮从 app.py 抽出去的），两处都要扫
+OPENAPI = ROOT / "src/cover_pipeline/server/openapi.py"
 JS = ROOT / "src/cover_pipeline/server/static/app.js"
 
 
@@ -24,7 +26,7 @@ def frontend_calls() -> set[str]:
 
 
 def documented() -> set[str]:
-    text = APP.read_text(encoding="utf-8")
+    text = APP.read_text(encoding="utf-8") + OPENAPI.read_text(encoding="utf-8")
     return set(re.findall(r'"(/api/[^"]+)":\s*\{', text))
 
 

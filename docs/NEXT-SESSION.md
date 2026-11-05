@@ -1,16 +1,16 @@
 # 下一个会话从这里开始
 
 > 这份文件是给「接手的人」看的：读完就能接着干，不用翻聊天记录。
+> 路径约定：`<repo>` 指仓库根目录（本项目所在目录），一律不写本机绝对路径——这个文件会进发布包。
 
-## 现在的状态（2026-11-06 03:5x）
+## 现在的状态（2026-11-06 04:0x）
 
-- 仓库：https://github.com/QSCAHSVL/qingyin ，第 7 轮已在本地提交（**还没 push**，所以 CI 还没跑）
-- 本地：`E:\AI-Companion\tools\cover-pipeline`，工作区干净
-- 测试：55 条全绿（`PYTHONPATH=src py -3 -m unittest discover -s tests -t .`）
+- 仓库：https://github.com/QSCAHSVL/qingyin ，第 6、7 轮都已在本地提交（**还没 push**，所以 CI 还没跑）
+- 本地：`<repo>`，工作区干净，main 比 origin 领先 3 个提交
+- 测试：59 条全绿（`PYTHONPATH=src py -3 -m unittest discover -s tests -t .`）
 - 前端静态检查：`py -3 scripts/check_frontend.py`（语法 + import 路径 + export 名，16 个文件 0 问题）
-- 已发布：`v0.4.1`，Release 里有 `qingyin-0.4.1-portable.zip` 与 `-setup.exe`（安装包已静默安装+卸载验证）
-- 环境：git 代理 `http.proxy=http://127.0.0.1:7897`（仓库本地配置）；GitHub 凭据在 Windows 凭据管理器
-- 本机跑着网页界面的老进程（`127.0.0.1:7801`，PID 会变）：静态文件是按请求读盘的，改完刷新即可，不用重启
+- 版本：0.4.2；`dist/` 里有 `卿音-0.4.2-portable.zip` 与 `卿音-0.4.2-setup.exe`
+- 本机跑着网页界面的进程（`127.0.0.1:7801`）：静态文件是按请求读盘的，改完刷新即可，不用重启
 
 ## 已完成（七轮）
 
@@ -23,6 +23,7 @@
 7. 拆 `server/app.py`：1605 → 391 行，业务搬到 `server/services/*.py`，接口描述抽到 `server/openapi.py`
 8. 拆 `static/app.js`：1917 行 → `core.js` + `nav.js` + `router.js` + `pages/*.js`(10) + `ui/*.js`(2)，
    原生 ES module，`index.html` 改成 `<script type="module" src="/static/app.js?v=10">`
+9. 修 `POST /api/jobs/{id}/retry` 必然 500（`JobManager.get()` 返回 dict 且不含 payload），补 4 条回归测试
 
 ## 第 6 轮拆完的后端结构（动 `app.py` 之前先看这个）
 
@@ -75,29 +76,39 @@ static/
 
 ## 下一轮任务
 
-### 第 8 轮：修 P0 bug + 上真机验证
-- **`POST /api/jobs/{id}/retry` 必然 500**：`jobs/manager.py::JobManager.get()` 返回 `job.as_dict()`（dict），
-  而 `server/services/jobs.py::retry_job` 按对象用（`job.kind`、`getattr(job, "payload", None)`）→ `AttributeError`。
-  修法：改成 `job["kind"]` / `job["payload"]`，再补一条测试（这是重构前就有的 bug）。
-  复现：`py -3 E:\AI-Companion\_tmp\round6\retry_proof.py`
+### 第 8 轮：上真机 + 发布
 - push 之后看 CI（第 7 轮新增的 `check_frontend.py` 两个步骤要全绿）
-- 真机：Demucs 装一遍（约 2GB 模型）跑一首，确认 `separate.backend=demucs`；安装包交互（开始菜单/桌面图标/卸载残留）
+- 真机：Demucs 装一遍（约 2GB 模型）跑一首，确认 `separate.backend=demucs`
+- 安装包交互：开始菜单、桌面图标、卸载残留（`dist/卿音-0.4.2-setup.exe` 已重出，需人工点一遍）
+- 可选：前端再加一层「页面模块按需 import」（现在是一次性全载，好处是简单、坏处是首屏多拉十几 KB）
 
 ## 开工前先做
 
 ```powershell
-cd E:\AI-Companion\tools\cover-pipeline
+cd <repo>
 $env:PYTHONPATH = "$PWD\src"
 py -3 -m unittest discover -s tests -t .
 py -3 scripts/check_frontend.py
 ```
 
+## 打包（会做隐私扫描，写文档时别带本机绝对路径）
+
+```powershell
+py -3 scripts/package.py                 # 绿色版目录 + zip（dist/卿音-<版本>-portable*）
+& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer\cover-pipeline.iss
+```
+
+> `package.py` 会扫 `[A-Z]:\` 这种个人盘路径，命中就中止——文档里一律用 `<repo>` 之类的相对写法。
+> `installer/cover-pipeline.iss` 的 `AppSource` 已经跟版本号联动，改版本只需改 `__init__.py` 再跑 `sync_version.py`。
+
 ## 可复用的验证脚本（都在仓库外，没提交）
 
-- `D:\AI-Companion-Data\qq-bridge\state\agents\_r7_split.py`：第 7 轮切分生成器（按 section 切片 + 跨模块改名 + 加 import/export）
-- `D:\AI-Companion-Data\qq-bridge\state\agents\_r7_baseline.ps1`：**新旧两版逐页 dump DOM 对比**（换回旧 `app.js.bak-round7-*` → dump → 换新版 → dump → Compare-Object）
-- `E:\AI-Companion\_tmp\round6\baseline\`：第 6 轮的 HTTP 契约快照 + diff（`capture.py` / `diff.py`，64 个端点）
-- `E:\AI-Companion\_tmp\round6\audit\`：路由清单 / OpenAPI / 方法体 AST 三方比对（`run_audit.py` 一键跑）
-- `E:\AI-Companion\_tmp\round6\lead_smoke.py`：13 个「会起后台任务」的 service 冒烟测试（重活全部打桩）
+- `_r7_split.py`：第 7 轮切分生成器（按 section 切片 + 跨模块改名 + 加 import/export），放在本机数据目录的
+  `qq-bridge\state\agents\` 下（具体路径见 memory-handoff，不进仓库）
+- `_r7_baseline.ps1`：**新旧两版逐页 dump DOM 对比**（换回旧 `app.js.bak-round7-*` → dump → 换新版 → dump → Compare-Object），同目录
+- 第 6 轮的验证脚本（本机临时目录 `_tmp\round6\`，不进仓库）：
+  - `baseline\`：HTTP 契约快照 + diff（`capture.py` / `diff.py`，64 个端点）
+  - `audit\`：路由清单 / OpenAPI / 方法体 AST 三方比对（`run_audit.py` 一键跑）
+  - `lead_smoke.py`：13 个「会起后台任务」的 service 冒烟测试（重活全部打桩）
 
 第 8 轮照抄这套思路：**先抓行为基线，再动代码，最后用两套独立证据对账**。

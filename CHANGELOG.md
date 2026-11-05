@@ -1,5 +1,16 @@
 # 更新日志
 
+## 0.4.2 — 2026-11-06
+
+- 重构：后端 `server/app.py` 1605 → 391 行，业务搬到 `server/services/*.py`，接口描述抽到 `server/openapi.py`
+- 重构：前端 `static/app.js` 1917 行拆成 `core.js` + `nav.js` + `router.js` + `pages/*.js`(10) + `ui/*.js`(2)，
+  原生 ES module，`index.html` 改 `<script type="module">`
+- 新增 `scripts/check_frontend.py`：ESM 语法（临时 `package.json` 里 `node --check`）+ import 路径 + export 名校验，
+  自带三个负例验证；CI 用它替换只扫 `static/*.js` 的旧步骤（`--syntax` 阻断、`--static` 非阻断）
+- 修复：`POST /api/jobs/{id}/retry` 必然 500 —— `JobManager.get()` 返回 `as_dict()`（dict 且不含 payload），
+  服务层却按对象用；新增 `JobManager.get_obj()` 并补 4 条回归测试
+- 测试：59 条全绿
+
 ## 0.4.1 — 2026-11-06
 
 - 方案引擎：按实际显存插值生成专属方案（fit_to_probe），连续显存区间不再落空

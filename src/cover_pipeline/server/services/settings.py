@@ -71,7 +71,7 @@ def save_settings(state: AppState, payload: dict[str, Any]) -> dict[str, Any]:
             probe = path / ".cover_write_test"
             probe.write_text("ok", encoding="utf-8")
             probe.unlink(missing_ok=True)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             problems.append(f"{key}：{path} 写不了（{exc}）")
             continue
         updates[key] = str(path)

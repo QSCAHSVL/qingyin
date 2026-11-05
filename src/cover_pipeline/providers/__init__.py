@@ -9,12 +9,12 @@ from __future__ import annotations
 import importlib.util
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from .. import config as cfg_mod
 from ..utils import log
-
 
 # --------------------------------------------------------------------------- 发布
 
@@ -47,13 +47,13 @@ def get_publish(name: str) -> PublishProvider:
 class AIProvider(ABC):
     name = "base"
 
-    def enhance(self, audio: Path, cfg: dict[str, Any]) -> Path:  # noqa: ARG002
+    def enhance(self, audio: Path, cfg: dict[str, Any]) -> Path:
         raise NotImplementedError
 
-    def transcribe(self, audio: Path, cfg: dict[str, Any]) -> str:  # noqa: ARG002
+    def transcribe(self, audio: Path, cfg: dict[str, Any]) -> str:
         raise NotImplementedError
 
-    def denoise(self, audio: Path, cfg: dict[str, Any]) -> Path:  # noqa: ARG002
+    def denoise(self, audio: Path, cfg: dict[str, Any]) -> Path:
         raise NotImplementedError
 
 
@@ -97,7 +97,7 @@ def load_plugins(plugins_dir: Path | None = None) -> list[str]:
             sys.modules[module_name] = module
             spec.loader.exec_module(module)
             loaded.append(path.name)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             log.warn(f"发布/AI 插件加载失败 {path.name}：{exc}")
     return loaded
 
@@ -159,4 +159,4 @@ def available_decrypt() -> list[str]:
 
 
 # 内置实现放在文件末尾导入，避免循环依赖
-from . import local_folder  # noqa: E402,F401
+from . import local_folder  # noqa: F401

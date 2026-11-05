@@ -25,10 +25,9 @@ from ..jobs.manager import JobManager
 from ..library.index import Library
 from ..utils import log
 from .openapi import openapi_spec
-from .services import jobs, library, models, plans, search
+from .services import jobs, library, models, plans, search, system, train
 from .services import probe as probe_service
 from .services import settings as settings_service
-from .services import system, train
 from .services.common import is_inside
 
 STATIC_DIR = Path(__file__).parent / "static"
@@ -72,7 +71,7 @@ def make_handler(state: AppState):
         server_version = f"cover-pipeline/{__version__}"
 
         # ------------------------------------------------------------ 路由
-        def do_GET(self) -> None:  # noqa: N802
+        def do_GET(self) -> None:
             parsed = urlparse(self.path)
             path = parsed.path
             query = parse_qs(parsed.query)
@@ -177,11 +176,11 @@ def make_handler(state: AppState):
                 if path == "/api/plans/available":
                     return self._json(plans.available(state))
                 return self._json({"error": "not found"}, 404)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 log.error(f"{path} 出错：{exc}")
                 return self._json({"error": str(exc)}, 500)
 
-        def do_POST(self) -> None:  # noqa: N802
+        def do_POST(self) -> None:
             parsed = urlparse(self.path)
             path = parsed.path
             payload = self._read_json()
@@ -279,7 +278,7 @@ def make_handler(state: AppState):
                     job_id = path.strip("/").split("/")[2]
                     return self._json(jobs.cancel_job(state, job_id))
                 return self._json({"error": "not found"}, 404)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 log.error(f"{path} 出错：{exc}")
                 return self._json({"error": str(exc)}, 500)
 
@@ -348,7 +347,7 @@ def make_handler(state: AppState):
                 return self._json({"error": "not found"}, 404)
             return self._file(resolved)
 
-        def log_message(self, fmt: str, *args: Any) -> None:  # noqa: A003
+        def log_message(self, fmt: str, *args: Any) -> None:
             return  # 静音：日志走自己的 log()
 
     return Handler

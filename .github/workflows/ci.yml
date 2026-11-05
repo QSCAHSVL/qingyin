@@ -18,11 +18,12 @@ jobs:
       - name: Version consistency
         run: python scripts/sync_version.py --check
 
-      - name: Lint (non-blocking)
-        continue-on-error: true
+      - name: Lint
+        # ruff 锁版本：规则集随版本变，不锁的话哪天 CI 会突然红给你看。
+        # 现在 src/tests 是 0 告警，所以这一条可以从「非阻断」转正了（0.4.2 起）。
         run: |
-          python -m pip install ruff
-          ruff check src tests --exit-zero --statistics
+          python -m pip install ruff==0.17.4
+          ruff check src tests
 
       - name: Install deps
         run: python -m pip install pyyaml

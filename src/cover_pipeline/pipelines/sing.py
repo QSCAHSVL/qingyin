@@ -10,10 +10,10 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from .. import config as cfg_mod
 from ..core import clip, convert, mix, pitch, separate
-from ..sources import get as get_source, load_plugins
-from ..utils import ffmpeg, log
+from ..sources import get as get_source
+from ..sources import load_plugins
+from ..utils import log
 
 STAGE_SOURCE = "1-源文件"
 STAGE_VOCAL = "2-人声"
@@ -86,7 +86,7 @@ def run_many(
         try:
             result = run(track["path"], name, cfg, force=force, full=full, cancel_event=cancel_event)
             results.append({"name": name, "ok": True, **result})
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if type(exc).__name__ == "Cancelled":
                 raise
             log.error(f"{name} 失败：{exc}")
@@ -156,7 +156,7 @@ def run(
             backing_copy = stems / f"{name}-伴奏.wav"
             shutil.copy2(backing_path, backing_copy)
             result["instrumental"] = str(backing_copy)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.warn(f"分轨导出失败（不影响成品）：{exc}")
 
     # 5) 挑段 / 切段
@@ -286,5 +286,5 @@ def _maybe_publish(audio: Path, name: str, cfg: dict, result: dict) -> None:
         where = provider.send(audio, {"name": name, "song": name, "target": conf.get("target"), "account": conf.get("account")}, cfg)
         result["published"] = where
         log.done(f"已发布：{where}")
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         log.warn(f"发布失败（成品还在本地）：{exc}")

@@ -19,7 +19,7 @@ MAX_ATTEMPTS = 2
 def classify(error_text: str) -> str:
     text = error_text or ""
     for pattern, kind in RULES:
-        if re.search(pattern, text, re.I):
+        if re.search(pattern, text, re.IGNORECASE):
             return kind
     return "unknown"
 

@@ -13,9 +13,10 @@ import threading
 import time
 import traceback
 import uuid
-from dataclasses import asdict, dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 
 @dataclass
@@ -105,7 +106,7 @@ class JobManager:
             job = self._jobs.get(job_id)
         return job.as_dict() if job else None
 
-    def get_obj(self, job_id: str) -> "Job | None":
+    def get_obj(self, job_id: str) -> Job | None:
         """拿 Job 对象本身。as_dict() 里没有 payload，重跑这类场景要读原始参数。"""
         with self._lock:
             return self._jobs.get(job_id)
@@ -129,7 +130,7 @@ class JobManager:
         job.message = "正在取消…"
         try:
             job.cancel_event.set()
-        except Exception as exc:  # noqa: BLE001 - 落盘失败只记录，不打断任务
+        except Exception as exc:
             try:
                 from ..utils.log import warn
 
@@ -166,7 +167,7 @@ class JobManager:
             job.result = result
             job.message = "完成"
             self._record_plan_stat(job, True)
-        except Exception as exc:  # noqa: BLE001 - 任务失败要留在状态里
+        except Exception as exc:
             if job.status == "cancelled" or type(exc).__name__ == "Cancelled":
                 job.status = "cancelled"
                 job.message = "已取消"
@@ -220,7 +221,7 @@ class JobManager:
                         "name": suggestion.get("name"),
                         "kind": kind,
                     }}
-        except Exception as exc:  # noqa: BLE001 - 统计失败不能影响任务状态
+        except Exception as exc:
             self.log(job, f"方案统计写入失败：{exc}")
 
     def log(self, job: Job, text: str) -> None:
@@ -241,7 +242,7 @@ class JobManager:
         try:
             path = self.dir / f"{job.id}.json"
             path.write_text(json.dumps(job.as_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
-        except Exception as exc:  # noqa: BLE001 - 落盘失败只记录，不打断任务
+        except Exception as exc:
             try:
                 from ..utils.log import warn
 

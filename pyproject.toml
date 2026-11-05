@@ -23,7 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 gui = ["gradio>=4.0"]
-dev = ["pytest>=8.0", "ruff>=0.5"]
+dev = ["pytest>=8.0", "ruff==0.17.4"]
 
 [project.scripts]
 cover = "cover_pipeline.cli:main"
@@ -36,4 +36,13 @@ where = ["src"]
 
 [tool.ruff]
 line-length = 110
-target-version = "0.2.0"
+target-version = "py310"
+
+[tool.ruff.lint]
+# 这些规则是「故意这么写的」，不是疏忽，别让它们把真正的告警淹掉：
+#   BLE001 / S110 / S112 —— 音源、外部工具、清理逻辑都是「尽力而为」，失败就降级，不中断主流程
+#   PLW1510 —— 有些子进程就是要看返回码自己判断（分离/转换），不能一把 check=True
+ignore = ["BLE001", "S110", "S112", "PLW1510"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["RUF059"]

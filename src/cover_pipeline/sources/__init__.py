@@ -14,13 +14,13 @@ from __future__ import annotations
 import importlib.util
 import sys
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from .. import config as cfg_mod
 from ..utils import log
 
-_REGISTRY: dict[str, type["SourceAdapter"]] = {}
+_REGISTRY: dict[str, type[SourceAdapter]] = {}
 
 
 class SourceNotFound(RuntimeError):
@@ -91,4 +91,4 @@ def iter_adapters() -> Iterable[str]:
 
 
 # 内置适配器：放在文件末尾导入，避免循环依赖
-from . import local_file  # noqa: E402,F401  (导入即注册)
+from . import local_file  # noqa: F401  (导入即注册)

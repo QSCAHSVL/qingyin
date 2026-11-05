@@ -14,8 +14,9 @@ import json
 import re
 import urllib.parse
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from ..utils import log
 
@@ -66,7 +67,7 @@ def search(query: str, limit: int = 12, sources: list[str] | None = None) -> lis
             continue
         try:
             per_source[name] = fn(query, limit)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             errors.append(f"{name}: {exc}")
 
     merged: list[dict[str, Any]] = []
@@ -282,7 +283,7 @@ def _download_ytdlp(
     log.step("下载中（yt-dlp）")
     if on_progress:
         on_progress("正在下载音频…")
-    out, err = proc_util.run(cmd, env=env, cancel_event=cancel_event)
+    out, _err = proc_util.run(cmd, env=env, cancel_event=cancel_event)
     lines = [line.strip() for line in (out or "").splitlines() if line.strip()]
     candidates = [Path(line) for line in lines if Path(line).suffix.lower() in (".wav", ".m4a", ".webm", ".opus", ".mp3")]
     for path in reversed(candidates):

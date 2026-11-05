@@ -123,9 +123,7 @@ def print_summary(result: dict[str, Any]) -> None:
     for line in render(result):
         if line.startswith("  !"):
             log.warn(line.strip())
-        elif line.startswith("建议"):
-            log.info(line)
-        elif line.startswith("  ·") or line.startswith("  "):
+        elif line.startswith(("建议", "  ·", "  ")):
             log.info(line)
         else:
             log.info(line)

@@ -53,7 +53,6 @@ def separate(src: Path, out_dir: Path, cfg: dict) -> SeparationResult:
 
 def _separate_local_uvr(src: Path, out_dir: Path, conf: dict, cfg: dict) -> SeparationResult:
     """用本地已部署的 UVR5 helper（uvr_sep.py）分离。"""
-    import subprocess
 
     from .. import probe
 

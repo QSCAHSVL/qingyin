@@ -12,7 +12,7 @@ from __future__ import annotations
 import statistics
 from pathlib import Path
 
-from ..utils import log
+from ..utils import ffmpeg, log
 
 # 认为「偏高」的阈值（Hz）：中位基频超过这个值就考虑降调
 HIGH_PITCH_HZ = 320.0

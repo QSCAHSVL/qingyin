@@ -167,7 +167,7 @@ def _disk_info(root: Path) -> dict[str, Any]:
 
 def _ffmpeg_info() -> dict[str, Any]:
     try:
-        exe = ffmpeg._which("ffmpeg")  # noqa: SLF001
+        exe = ffmpeg._which("ffmpeg")
     except Exception:
         return {"available": False, "version": ""}
     try:

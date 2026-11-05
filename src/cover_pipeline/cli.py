@@ -8,10 +8,14 @@ import shutil
 import sys
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from . import __version__
 from . import config as cfg_mod
 from .utils import ffmpeg, log
+
+if TYPE_CHECKING:  # 只服务类型标注；运行时在函数里再导入（启动快、也不引入循环）
+    from .plan import Profile
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -331,7 +335,7 @@ def cmd_sources(args: argparse.Namespace, cfg: dict) -> int:
 
 def cmd_plan(args: argparse.Namespace, cfg: dict) -> int:
     from . import probe as probe_mod
-    from .plan import Profile, apply_plan, current_plan, load_plans, recommend, render_card
+    from .plan import apply_plan, current_plan, load_plans, recommend, render_card
 
     snapshot = probe_mod.probe(cfg)
 
@@ -451,7 +455,7 @@ def _post_apply_check(snapshot: dict) -> int:
     return 0 if ok else 1
 
 
-def _build_profile(args: argparse.Namespace) -> "Profile":
+def _build_profile(args: argparse.Namespace) -> Profile:
     from .plan import Profile
 
     flags = {
@@ -564,11 +568,9 @@ def cmd_serve(args: argparse.Namespace, cfg: dict) -> int:
 def cmd_desktop(args: argparse.Namespace, cfg: dict) -> int:
     """桌面窗口模式：起本地服务，再用 pywebview 套一个窗口。"""
     import threading
-    import time
-    import webbrowser
+    from http.server import ThreadingHTTPServer
 
     from .server.app import AppState, make_handler
-    from http.server import ThreadingHTTPServer
 
     try:
         import webview  # type: ignore

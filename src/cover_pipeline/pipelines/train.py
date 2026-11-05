@@ -84,7 +84,7 @@ def run(data_dir: Path, name: str, cfg: dict, *, dry_run: bool = False, on_progr
         "  数据集已经准备好，你可以：\n"
         "  1) 在 configs/local.yaml 里设置 train.command，指向 RVC 的训练命令模板\n"
         "  2) 或者用 RVC WebUI 直接加载这个数据集目录训练\n"
-        f"  占位符：{{dataset}} {{name}} {{epochs}} {{batch}} {{sample_rate}}"
+        "  占位符：{dataset} {name} {epochs} {batch} {sample_rate}"
     )
     return {"segments": len(segments), "dataset": str(dataset_dir), "trained": False}
 

@@ -10,12 +10,12 @@
 from __future__ import annotations
 
 import importlib.util
-import os
 import sys
 import urllib.request
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from ..utils import log, proc
 
@@ -244,7 +244,7 @@ def _download(step: Step, cfg: dict[str, Any], cancel_event, on_progress=None) -
         try:
             _download_file(url, dest, cancel_event, on_progress=on_progress, label=step.label)
             return
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             last_error = exc
             log.warn(f"{url} 下载失败：{exc}，换下一个源")
     raise RuntimeError(f"{step.label} 下载失败：{last_error}（建议手动下载放到 {dest}）")

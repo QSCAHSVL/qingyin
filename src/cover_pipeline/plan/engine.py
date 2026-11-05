@@ -8,8 +8,6 @@
 
 from __future__ import annotations
 
-from . import stats
-
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -17,6 +15,7 @@ from typing import Any
 import yaml
 
 from .. import config as cfg_mod
+from . import stats
 
 PLANS_DIR = cfg_mod.ROOT / "plans"
 
@@ -230,7 +229,7 @@ def _blend_numeric(a, b, t):
     if isinstance(a, (int, float)) and isinstance(b, (int, float)):
         value = a + (b - a) * t
         if isinstance(a, int) and isinstance(b, int):
-            return int(round(value))
+            return round(value)
         return round(value, 3)
     return b if t >= 0.5 else a
 

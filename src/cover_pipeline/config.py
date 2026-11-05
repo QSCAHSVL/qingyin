@@ -18,7 +18,7 @@ def _read_yaml(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
     if not isinstance(data, dict):
-        raise ValueError(f"配置文件格式不对，需要是映射：{path}")
+        raise TypeError(f"配置文件格式不对，需要是映射：{path}")
     return data
 
 

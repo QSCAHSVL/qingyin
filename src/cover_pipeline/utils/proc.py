@@ -10,8 +10,8 @@ from __future__ import annotations
 import subprocess
 import tempfile
 import time
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 IDLE_TIMEOUT = 300.0  # 秒：这么久没有任何输出就认为卡住了
 

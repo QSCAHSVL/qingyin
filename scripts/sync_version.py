@@ -23,6 +23,16 @@ def current_version() -> str:
     return re.search(r'__version__\s*=\s*"([^"]+)"', text).group(1)
 
 
+def _assert_ruff_target_ok(pyproject_text: str) -> None:
+    """pyproject 里的 [tool.ruff] target-version 必须是 py310 这种，不能被版本号顶掉。"""
+    match = re.search(r'(?m)^target-version = "([^"]+)"$', pyproject_text)
+    if match and not re.fullmatch(r"py3\d{1,2}", match.group(1)):
+        raise SystemExit(
+            "pyproject 的 [tool.ruff] target-version 不合法：%r（应该是 py310）。"
+            "历史上版本号同步脚本误改过它，先修好再同步。" % match.group(1)
+        )
+
+
 def sync(check_only: bool = False) -> int:
     version = current_version()
     changed: list[str] = []
@@ -30,6 +40,9 @@ def sync(check_only: bool = False) -> int:
     pyproject = ROOT / "pyproject.toml"
     text = pyproject.read_text(encoding="utf-8")
     new = re.sub(r'(?m)^version = ".*"$', f'version = "{version}"', text, count=1)
+    # 守卫：以前这条正则没锚行首，把 [tool.ruff] target-version 也改成了 0.x.y，
+    # 结果 ruff 直接起不来、而 CI 的 lint 是非阻断，谁都没发现。改动前后都验一遍。
+    _assert_ruff_target_ok(new)
     if new != text:
         if not check_only:
             pyproject.write_text(new, encoding="utf-8")

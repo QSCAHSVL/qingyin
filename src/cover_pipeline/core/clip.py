@@ -54,7 +54,7 @@ def pick_chorus(src: Path, seconds: float, cfg: dict) -> ClipResult:
 
     window = float((cfg.get("clip", {}) or {}).get("energy_window", 0.5) or 0.5)
     per_second = 1.0 / window
-    span = max(1, int(round(seconds * per_second)))
+    span = max(1, round(seconds * per_second))
     if span >= len(energies):
         return ClipResult(start=0.0, seconds=total, path=src)
 
@@ -98,7 +98,7 @@ def split_full(src: Path, segment_seconds: float, out_dir: Path) -> list[Path]:
 
 def _window_energies(src: Path, window_seconds: float = WINDOW_SECONDS) -> list[float]:
     """解码成 8k 单声道 PCM，按窗口算 RMS。"""
-    ffmpeg_path = ffmpeg._which("ffmpeg")  # noqa: SLF001 - 复用统一解析
+    ffmpeg_path = ffmpeg._which("ffmpeg")
     proc = subprocess.run(
         [
             ffmpeg_path,

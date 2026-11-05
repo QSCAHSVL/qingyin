@@ -63,3 +63,11 @@ source:
 ```bash
 cover sing --input D:/music/song.flac --name 歌名
 ```
+
+## 实测记录（2026-11）
+
+- B 站搜索接口对服务端请求有风控，常见 412；用 `yt-dlp` 的 `bilisearch` 同样被拦。
+- 稳定的替代路线：**网易云 `song/media/outer/url?id=<id>.mp3`**（公开非 VIP 曲目可直接下），
+  先用 `music.163.com/api/search/get/web` 搜 id，再取 outer 链接。
+- QQ 音乐搜索接口（`c.y.qq.com/soso/...`）可用，但取播放地址要 vkey，缺密钥的曲子拿不到。
+- 结论：找歌顺序建议 **本地曲库 → 网易云 outer → 用户提供的 B 站链接**。

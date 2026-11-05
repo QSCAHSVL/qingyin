@@ -1,5 +1,11 @@
 # 卿音（cover-pipeline）
 
+[![CI](https://github.com/QSCAHSVL/qingyin/actions/workflows/ci.yml/badge.svg)](https://github.com/QSCAHSVL/qingyin/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
+
+
 > 本地翻唱流水线：找歌 → 人声分离 → 音色转换 → 混音出片，全在本机跑。
 
 一条命令，从「歌名」到「成品翻唱」：**素材训练 → 人声分离 → 音色转换 → 混音 → 自动挑副歌 → 导出/发送**。

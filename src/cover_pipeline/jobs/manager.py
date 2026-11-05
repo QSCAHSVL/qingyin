@@ -124,8 +124,13 @@ class JobManager:
         job.message = "正在取消…"
         try:
             job.cancel_event.set()
-        except Exception:
-            pass
+        except Exception as exc:  # noqa: BLE001 - 落盘失败只记录，不打断任务
+            try:
+                from ..utils.log import warn
+
+                warn(f"任务状态落盘失败：{exc}")
+            except Exception:
+                pass
         self._persist(job)
         return True
 
@@ -155,6 +160,7 @@ class JobManager:
             job.progress = 1.0
             job.result = result
             job.message = "完成"
+            self._record_plan_stat(job, True)
         except Exception as exc:  # noqa: BLE001 - 任务失败要留在状态里
             if job.status == "cancelled" or type(exc).__name__ == "Cancelled":
                 job.status = "cancelled"
@@ -174,11 +180,43 @@ class JobManager:
                 job.error = f"{exc}"
                 job.message = str(exc)[:200]
             self.log(job, traceback.format_exc())
+            self._record_plan_stat(job, False, error_text=f"{exc}\n{traceback.format_exc()[-2000:]}")
         finally:
             job.ended_at = time.time()
             self._persist(job)
             if acquired:
                 self._gpu_lock.release()
+
+    def _record_plan_stat(self, job: Job, ok: bool, error_text: str = "") -> None:
+        """把这次跑的方案与耗时回写，供方案引擎下次加权；失败时附一条自愈建议。"""
+        payload = job.payload or {}
+        plan = payload.get("plan") if isinstance(payload.get("plan"), dict) else None
+        plan_id = (plan or {}).get("id") or payload.get("plan_id")
+        if not plan_id:
+            return
+        seconds = None
+        if job.started_at and job.ended_at:
+            seconds = round(job.ended_at - job.started_at, 1)
+        kind = None
+        try:
+            from ..plan import heal, stats
+
+            if ok:
+                stats.record(str(plan_id), True, seconds=seconds)
+                return
+            kind = heal.classify(error_text)
+            stats.record(str(plan_id), False, seconds=seconds, kind=kind,
+                         note=(error_text or "")[:200].replace("\n", " "))
+            if plan:
+                suggestion = heal.next_plan(plan, error_text, 1)
+                if suggestion:
+                    job.result = {**(job.result or {}), "heal_suggestion": {
+                        "plan_id": suggestion.get("id"),
+                        "name": suggestion.get("name"),
+                        "kind": kind,
+                    }}
+        except Exception as exc:  # noqa: BLE001 - 统计失败不能影响任务状态
+            self.log(job, f"方案统计写入失败：{exc}")
 
     def log(self, job: Job, text: str) -> None:
         if not job.log_path:
@@ -198,8 +236,13 @@ class JobManager:
         try:
             path = self.dir / f"{job.id}.json"
             path.write_text(json.dumps(job.as_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
-        except Exception:
-            pass
+        except Exception as exc:  # noqa: BLE001 - 落盘失败只记录，不打断任务
+            try:
+                from ..utils.log import warn
+
+                warn(f"任务状态落盘失败：{exc}")
+            except Exception:
+                pass
 
     def _load_existing(self) -> None:
         """重启后把历史任务读回来，正在跑的标记成中断。"""

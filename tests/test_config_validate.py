@@ -1,4 +1,4 @@
-import unittest
+﻿import unittest
 
 from cover_pipeline import config
 
@@ -21,7 +21,7 @@ class ConfigValidateTest(unittest.TestCase):
 
     def test_real_config_loads(self):
         cfg = config.load_config()
-        self.assertIn("server", cfg)
+        self.assertIn("project", cfg)
 
 
 if __name__ == "__main__":

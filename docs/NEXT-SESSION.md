@@ -5,8 +5,8 @@
 
 ## 现在的状态（2026-11-06 04:0x）
 
-- 仓库：https://github.com/QSCAHSVL/qingyin ，第 6、7 轮都已在本地提交（**还没 push**，所以 CI 还没跑）
-- 本地：`<repo>`，工作区干净，main 比 origin 领先 3 个提交
+- 仓库：https://github.com/QSCAHSVL/qingyin ，第 6、7 轮已提交并 push 到 origin/main，CI 全绿
+- 本地：`<repo>`，工作区干净，与 origin/main 同步
 - 测试：59 条全绿（`PYTHONPATH=src py -3 -m unittest discover -s tests -t .`）
 - 前端静态检查：`py -3 scripts/check_frontend.py`（语法 + import 路径 + export 名，16 个文件 0 问题）
 - 版本：0.4.2；`dist/` 里有 `卿音-0.4.2-portable.zip` 与 `卿音-0.4.2-setup.exe`
@@ -77,7 +77,6 @@ static/
 ## 下一轮任务
 
 ### 第 8 轮：上真机 + 发布
-- push 之后看 CI（第 7 轮新增的 `check_frontend.py` 两个步骤要全绿）
 - 真机：Demucs 装一遍（约 2GB 模型）跑一首，确认 `separate.backend=demucs`
 - 安装包交互：开始菜单、桌面图标、卸载残留（`dist/卿音-0.4.2-setup.exe` 已重出，需人工点一遍）
 - 可选：前端再加一层「页面模块按需 import」（现在是一次性全载，好处是简单、坏处是首屏多拉十几 KB）

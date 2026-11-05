@@ -1,13 +1,13 @@
 # 运行产物
-work/
-output/
+/work/
+/output/
 *.wav
 *.mp3
 *.flac
 !examples/**/*.wav
 
 # 模型与权重（体积大，不进仓库）
-models/
+/models/
 *.pth
 *.index
 *.onnx
@@ -39,11 +39,11 @@ configs/local.yaml
 configs/local.yaml.bak-*
 .env
 decisions.jsonl
-dist/
+/dist/
 
 # 运行日志
-logs/
-backups/
+/logs/
+/backups/
 # 本机发布脚本（含仓库地址，不进库）
 push-qingyin.bat
 推送到GitHub.bat

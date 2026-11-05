@@ -1,0 +1,11 @@
+# 已验证组合（2026-11-05，Python 3.14 / Windows 11）
+# 装法：pip install -r requirements.lock
+pyyaml==6.0.3
+
+# 下面这些按需装，不必全装：
+# 只用本机已有 RVC/UVR 的人，上面一行就够
+yt-dlp==2026.10.21        # 在线找歌 / 下载
+# audio-separator[gpu]    # 不想用本机 UVR 时，分离走这个包（会连带装 torch）
+# rvc-python              # 不想用本机 RVC 时，转换走这个包（会连带装 torch）
+# torch==2.x / torchaudio # 由上面两个包决定版本，别单独钉
+# pywebview               # 桌面窗口模式 cover desktop

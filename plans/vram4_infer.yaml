@@ -1,0 +1,45 @@
+id: vram4_infer
+name: "4G 显存 · 只推理"
+tier: 4
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 3.5
+  max_vram_gb: 5.9
+  min_disk_gb: 10
+  needs_train: no
+scores:
+  quality: 3
+  speed: 3
+  space: 4
+  stability: 4
+params:
+  separate:
+    backend: local_uvr
+    local_model: hp2
+    model: UVR-MDX-NET-Inst_Main
+  convert:
+    backend: local_rvc
+    f0_method: rmvpe
+    index_rate: 0.7
+    protect: 0.5
+  train:
+    epochs: 0
+    batch_size: 1
+  clip:
+    seconds: 45
+  mix:
+    normalize: true
+    target_lufs: -14
+estimate:
+  per_song_minutes: 8
+  vram_peak_gb: 3.4
+  disk_per_song_mb: 200
+  train_minutes: 0
+pros:
+  - "4G 显存能跑，不容易爆显存"
+  - "分离用轻量模型，速度快"
+cons:
+  - "不能自己训练音色"
+  - "分离质量一般，伴奏可能有残留人声"
+explain: "4G 显存优先保证不崩。分离用轻量模型，训练就别想了，用现成模型唱。"

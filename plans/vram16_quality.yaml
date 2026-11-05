@@ -1,0 +1,24 @@
+id: vram16_quality
+name: "16G+ 显存 · 音质优先"
+tier: 16
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 15
+  max_vram_gb: 32
+  min_disk_gb: 60
+  needs_train: optional
+scores: { quality: 5, speed: 5, space: 2, stability: 5 }
+params:
+  separate: { backend: local_uvr, local_model: becruily }
+  convert: { backend: local_rvc, f0_method: rmvpe, index_rate: 0.9, protect: 0.4 }
+  train: { epochs: 180, batch_size: 10 }
+  clip: { seconds: 60 }
+  mix: { normalize: true, target_lufs: -11 }
+estimate: { per_song_minutes: 3, vram_peak_gb: 12.5, disk_per_song_mb: 380, train_minutes: 50 }
+pros:
+  - "大 batch + 多轮数，音质和速度都能要"
+  - "分离用最高档，伴奏残留最少"
+cons:
+  - "每首占盘最多"
+explain: "16G 以上不用取舍：batch 10、训练 180 轮、分离最高档，一首 3 分钟。"

@@ -1,0 +1,149 @@
+# 模型与运行时清单：新用户什么都没有时，按环境和需求挑一套
+#
+# 说明：
+# - size_mb 是安装后的磁盘占用估算（含解压）
+# - vram_gb / ram_gb 是跑起来的峰值占用
+# - quality / speed 是 1~5 的主观评分，用来和用户的偏好对齐
+# - source 只写「从哪拿」，不内置直链：第三方权重的地址和授权随时会变，
+#   让用户自己去上游页面下载，比我们缓存一堆会失效的链接更靠谱
+
+runtimes:
+  - id: torch_cuda
+    label: "PyTorch（CUDA 版，含 torchaudio）"
+    size_mb: 2600
+    vram_gb: 0
+    ram_gb: 2
+    quality: 0
+    speed: 5
+    requires_gpu: true
+    source: "pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121"
+    note: "有 N 卡装这个；没显卡别装，白占 2.6G"
+
+  - id: torch_cpu
+    label: "PyTorch（CPU 版）"
+    size_mb: 220
+    vram_gb: 0
+    ram_gb: 2
+    quality: 0
+    speed: 1
+    requires_gpu: false
+    source: "pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu"
+    note: "没显卡时用，慢但能跑"
+
+  - id: audio_separator
+    label: "audio-separator（分离运行时）"
+    size_mb: 60
+    vram_gb: 0
+    ram_gb: 1
+    quality: 0
+    speed: 0
+    source: "pip install audio-separator[gpu]（无显卡用 [cpu]）"
+    note: "不想用本机 UVR 才装；已有 UVR 的跳过"
+
+  - id: rvc_python
+    label: "rvc-python（转换运行时）"
+    size_mb: 40
+    vram_gb: 0
+    ram_gb: 1
+    quality: 0
+    speed: 0
+    source: "pip install rvc-python"
+    note: "不想用本机 RVC 才装；已有 RVC 的跳过"
+
+  - id: demucs
+    label: "Demucs（另一种分离方案）"
+    size_mb: 300
+    vram_gb: 2.5
+    ram_gb: 3
+    quality: 4
+    speed: 2
+    source: "pip install demucs"
+    note: "分离不干净时的备选，人声更干净但慢"
+
+models:
+  - id: uvr_becruily
+    label: "BS-RoFormer 分离模型（becruily）"
+    kind: separation
+    size_mb: 420
+    vram_gb: 3.5
+    ram_gb: 2
+    quality: 5
+    speed: 2
+    source: "audio-separator 首次运行自动下载；本机 UVR 用户检查 uvr5_weights 里有没有"
+    note: "质量最高，8G 卡跑得动"
+
+  - id: uvr_hp2
+    label: "UVR HP2 分离模型"
+    kind: separation
+    size_mb: 120
+    vram_gb: 1.2
+    ram_gb: 1
+    quality: 2
+    speed: 5
+    source: "audio-separator / 本机 UVR 自带"
+    note: "小、快，但伴奏会残留人声"
+
+  - id: hubert_base
+    label: "HuBERT 特征模型（RVC 必需）"
+    kind: base
+    size_mb: 360
+    vram_gb: 1.0
+    ram_gb: 1
+    quality: 0
+    speed: 0
+    source: "RVC 仓库 assets/hubert/hubert_base.pt"
+    note: "没有它无法转换音色；本机 RVC 用户通常已有"
+
+  - id: rmvpe
+    label: "RMVPE 音高模型（推荐 f0）"
+    kind: base
+    size_mb: 180
+    vram_gb: 0.8
+    ram_gb: 0.5
+    quality: 4
+    speed: 3
+    source: "RVC 仓库 assets/rmvpe/rmvpe.pt"
+    note: "比 pm/harvest 准，唱歌首选"
+
+  - id: pretrained_v2
+    label: "RVC 预训练底模（自己训练才需要）"
+    kind: train
+    size_mb: 200
+    vram_gb: 0
+    ram_gb: 0
+    quality: 0
+    speed: 0
+    source: "RVC 仓库 assets/pretrained_v2/"
+    note: "要从零训练音色才需要；只推理不用"
+
+# 场景包：按「有没有显卡 / 要不要训练 / 在不在意空间」组合
+bundles:
+  - id: reuse_local
+    label: "复用本机已装环境（最省空间）"
+    needs: { gpu: any, train: any }
+    includes: []
+    note: "你已经装过 RVC/UVR，先用 cover link 认一下，什么都不用下"
+
+  - id: minimal_gpu
+    label: "全新机器 · 有显卡 · 只翻唱"
+    needs: { gpu: true, train: "no" }
+    includes: [torch_cuda, audio_separator, rvc_python, uvr_becruily, hubert_base, rmvpe]
+    note: "约 3.6G，一条 pip + 几个权重文件"
+
+  - id: minimal_gpu_train
+    label: "全新机器 · 有显卡 · 要训练"
+    needs: { gpu: true, train: "yes" }
+    includes: [torch_cuda, audio_separator, rvc_python, uvr_becruily, hubert_base, rmvpe, pretrained_v2]
+    note: "比只翻唱多 200MB 预训练底模"
+
+  - id: low_vram
+    label: "显存紧张（4~6G）"
+    needs: { gpu: true, train: any }
+    includes: [torch_cuda, audio_separator, rvc_python, uvr_hp2, hubert_base, rmvpe]
+    note: "分离换轻量模型，显存峰值从 3.5G 降到 1.2G"
+
+  - id: cpu_only
+    label: "没有显卡 · 只翻唱"
+    needs: { gpu: false, train: "no" }
+    includes: [torch_cpu, audio_separator, rvc_python, uvr_hp2, hubert_base, rmvpe]
+    note: "约 0.9G，能跑但一首十几分钟"

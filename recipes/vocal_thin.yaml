@@ -1,0 +1,24 @@
+id: vocal_thin
+symptom: "人声发干、发尖、没厚度"
+applies_to: [convert, mix]
+selected: more_protect
+recipes:
+  - id: more_protect
+    name: "提高 protect（推荐）"
+    how: "protect 0.5→0.6，少动辅音，保留原始咬字"
+    cost: "不变"
+    risk: "音色相似度略降"
+    params: { convert: { protect: 0.6 } }
+  - id: warmth_eq
+    name: "混音补中低频"
+    how: "混音链加 250Hz 提升 1.5dB，补人声厚度"
+    cost: "不变"
+    risk: "过多会发闷"
+    params: { mix: { warmth_db: 1.5 } }
+  - id: keep_index
+    name: "index_rate 降到 0.6"
+    how: "少用特征库，保留更多原声细节"
+    cost: "不变"
+    risk: "可能不像目标音色"
+    params: { convert: { index_rate: 0.6 } }
+    experimental: true

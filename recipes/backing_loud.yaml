@@ -1,0 +1,23 @@
+id: backing_loud
+symptom: "伴奏盖过人声，唱的词听不清"
+applies_to: [mix]
+selected: boost_vocal
+recipes:
+  - id: boost_vocal
+    name: "人声 +2dB（推荐）"
+    how: "混音时人声音量 2.0→2.5"
+    cost: "不变"
+    risk: "人声大了可能有点冲"
+    params: { mix: { vocal_gain: 2.5 } }
+  - id: duck_backing
+    name: "伴奏降 2dB"
+    how: "伴奏轨音量降到 0.8"
+    cost: "不变"
+    risk: "整体会显得薄"
+    params: { mix: { backing_gain: 0.8 } }
+  - id: rebalance
+    name: "两边一起调"
+    how: "人声 +1.5dB、伴奏 -1dB，比较温和"
+    cost: "不变"
+    risk: "变化幅度小，效果不一定明显"
+    params: { mix: { vocal_gain: 2.3, backing_gain: 0.9 } }

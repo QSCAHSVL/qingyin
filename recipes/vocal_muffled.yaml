@@ -1,0 +1,26 @@
+id: vocal_muffled
+symptom: "人声发闷、咬字糊、像隔着一层布"
+applies_to: [convert]
+selected: raise_protect
+recipes:
+  - id: raise_protect
+    name: "提高 protect（推荐）"
+    how: "protect 从 0.5 提到 0.66，让模型少改辅音和爆破音"
+    cost: "转换时间不变"
+    risk: "太高（>0.7）会让音色不像目标，变成半原声"
+    params: { protect: 0.66 }
+    evidence: "2026-10 实测：齿音和 t/d 音清晰度明显回升，音色相似度略降"
+  - id: lower_index
+    name: "降低 index_rate"
+    how: "index_rate 从 0.75 降到 0.5，减少特征库覆盖，保留更多原始细节"
+    cost: "不变"
+    risk: "音色相似度下降，可能变得不像目标声音"
+    params: { index_rate: 0.5 }
+    evidence: "音色模型训练素材少时效果更明显；素材充足时反而变差"
+  - id: soften_separation
+    name: "换轻量分离模型"
+    how: "分离从 becruily 换 hp2，残留多一点但人声更饱满"
+    cost: "分离更快"
+    risk: "伴奏里会混进人声，整体更糊"
+    params: { local_model: hp2 }
+    experimental: true

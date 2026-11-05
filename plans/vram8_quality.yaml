@@ -1,0 +1,45 @@
+id: vram8_quality
+name: "8G 显存 · 音质优先"
+tier: 8
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 7.5
+  max_vram_gb: 11.9
+  min_disk_gb: 40
+  needs_train: optional
+scores:
+  quality: 5
+  speed: 2
+  space: 2
+  stability: 3
+params:
+  separate:
+    backend: local_uvr
+    local_model: becruily
+    model: UVR-MDX-NET-Inst_HQ_4
+  convert:
+    backend: local_rvc
+    f0_method: rmvpe
+    index_rate: 0.85
+    protect: 0.4
+  train:
+    epochs: 120
+    batch_size: 4
+  clip:
+    seconds: 60
+  mix:
+    normalize: true
+    target_lufs: -12
+estimate:
+  per_song_minutes: 7
+  vram_peak_gb: 7.4
+  disk_per_song_mb: 320
+  train_minutes: 75
+pros:
+  - "分离最干净，伴奏残留最少"
+  - "index_rate 高，音色更像"
+cons:
+  - "单曲 7 分钟，显存峰值 7.4G，容易和别的程序抢"
+  - "磁盘占用比均衡方案多三成"
+explain: "同样的 8G 卡，牺牲速度和显存余量换音质：HQ_4 分离 + index_rate 0.85 + 训练 120 轮。跑的时候最好把浏览器关掉。"

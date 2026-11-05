@@ -1,0 +1,45 @@
+id: vram6_balanced
+name: "6G 显存 · 均衡"
+tier: 6
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 5.5
+  max_vram_gb: 7.9
+  min_disk_gb: 20
+  needs_train: optional
+scores:
+  quality: 3
+  speed: 3
+  space: 3
+  stability: 4
+params:
+  separate:
+    backend: local_uvr
+    local_model: becruily
+    model: UVR-MDX-NET-Inst_HQ_3
+  convert:
+    backend: local_rvc
+    f0_method: rmvpe
+    index_rate: 0.75
+    protect: 0.5
+  train:
+    epochs: 60
+    batch_size: 2
+  clip:
+    seconds: 45
+  mix:
+    normalize: true
+    target_lufs: -14
+estimate:
+  per_song_minutes: 5
+  vram_peak_gb: 5.2
+  disk_per_song_mb: 220
+  train_minutes: 75
+pros:
+  - "能训练也能推理，batch 降到 2 就不容易爆"
+  - "分离质量比轻量模型好一截"
+cons:
+  - "训练比 8G 慢一半左右"
+  - "同时开浏览器和游戏可能不够用"
+explain: "6G 的甜点方案：分离用 HQ 模型，训练把 batch 降到 2、轮数 60，慢一点但稳。"

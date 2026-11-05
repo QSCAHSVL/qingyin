@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>卿音 · API</title>
+  <link rel="stylesheet" href="/static/style.css?v=9" />
+  <style>
+    .docs-layout { display: grid; grid-template-columns: 210px 1fr; gap: 20px; align-items: start; }
+    .cat-nav { position: sticky; top: 20px; display: flex; flex-direction: column; gap: 2px; }
+    .cat-nav a {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 10px; border-radius: var(--r-8); color: var(--text-2);
+      font-size: 13px; text-decoration: none;
+    }
+    .cat-nav a:hover { background: var(--surface-2); color: var(--text); }
+    .cat-nav a .n { font-size: 11px; color: var(--text-3); }
+    .cat { margin-bottom: 22px; }
+    .cat > h3 { margin: 0 0 4px; font-size: 15px; }
+    .cat > p { margin: 0 0 10px; color: var(--text-2); font-size: 12.5px; }
+    .endpoint {
+      border: 1px solid var(--line); border-radius: var(--r-10); padding: 11px 13px;
+      background: var(--surface);
+    }
+    .endpoint + .endpoint { margin-top: 8px; }
+    .endpoint .head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .method { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 5px; letter-spacing: .4px; }
+    .method.get { background: var(--ok-soft); color: var(--ok); }
+    .method.post { background: var(--accent-soft); color: var(--accent); }
+    .path { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+    .endpoint .params { color: var(--text-3); font-size: 11.5px; margin-top: 5px; }
+    .endpoint pre { max-height: 200px; margin-top: 6px; }
+    .endpoint button { padding: 3px 9px; font-size: 11.5px; }
+    @media (max-width: 900px) { .docs-layout { grid-template-columns: 1fr; } .cat-nav { position: static; flex-direction: row; overflow-x: auto; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">音</div>
+      <div><h1>卿音 API</h1><small>本机 HTTP 接口</small></div>
+    </div>
+    <nav class="nav">
+      <a href="/"><svg><use href="#i-home"/></svg>回到界面</a>
+      <a href="/api/openapi.json" target="_blank"><svg><use href="#i-api"/></svg>openapi.json</a>
+    </nav>
+  <div class="foot">默认只监听 127.0.0.1；除 /api/agent/* 用本地 key 外都不需要鉴权，别直接暴露到公网。</div>
+  </aside>
+
+  <main class="main">
+    <svg style="display:none" aria-hidden="true">
+      <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></symbol>
+      <symbol id="i-api" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="m15 7 5 5-5 5"/></symbol>
+    </svg>
+
+    <div class="page-head">
+      <h2>接口一览</h2>
+      <p id="docs-sub">按用途分类；GET 接口可以直接点「试一下」。</p>
+    </div>
+
+    <div class="card agent-card" id="agent-box">
+      <div class="card-head">
+        <h3>给外部 Agent 用</h3>
+        <div class="actions">
+          <button class="ghost small" id="agent-copy">复制 Key</button>
+        </div>
+      </div>
+      <div class="agent-grid">
+        <label class="field">
+          Key
+          <input id="agent-key" readonly placeholder="读取中…" />
+        </label>
+        <div class="agent-meta" id="agent-hint"></div>
+      </div>
+      <div class="field-note">调用 /api/agent/* 时带 <code>X-Api-Key</code> 头；其余接口只监听本机，不需要鉴权。</div>
+    </div>
+
+    <div class="docs-layout">
+      <nav class="cat-nav" id="cat-nav" aria-label="接口分类"></nav>
+      <div id="cats"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const state = { spec: null };
+
+function el(tag, cls, text) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function methodOf(entry) {
+  return Object.keys(entry)[0];
+}
+
+async function loadSpec() {
+  const res = await fetch("/api/openapi.json");
+  state.spec = await res.json();
+  render();
+}
+
+function render() {
+  const spec = state.spec;
+  const nav = document.getElementById("cat-nav");
+  const cats = document.getElementById("cats");
+  const groups = new Map();
+
+  Object.entries(spec.paths).forEach(([path, entry]) => {
+    const method = methodOf(entry);
+    const detail = entry[method] || {};
+    const tag = (detail.tags && detail.tags[0]) || "其他";
+    if (!groups.has(tag)) groups.set(tag, []);
+    groups.get(tag).push({ path, method, spec: detail });
+  });
+
+  const order = (spec.tags || []).map((t) => t.name);
+  const names = [...groups.keys()].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  let total = 0;
+
+  nav.innerHTML = "";
+  cats.innerHTML = "";
+
+  names.forEach((name) => {
+    const items = groups.get(name);
+    total += items.length;
+    const meta = (spec.tags || []).find((t) => t.name === name) || {};
+
+    const navLink = el("a", null);
+    navLink.href = "#" + encodeURIComponent(name);
+    navLink.appendChild(el("span", null, name));
+    navLink.appendChild(el("span", "n", String(items.length)));
+    nav.appendChild(navLink);
+
+    const section = el("section", "cat");
+    section.id = encodeURIComponent(name);
+    section.appendChild(el("h3", null, name));
+    if (meta.description) section.appendChild(el("p", null, meta.description));
+
+    items.forEach(({ path, method, spec: detail }) => section.appendChild(endpointCard(path, method, detail)));
+    cats.appendChild(section);
+  });
+
+  document.getElementById("docs-sub").textContent =
+    `共 ${total} 个接口，分 ${names.length} 类。GET 接口可以点「试一下」直接在本机跑。`;
+}
+
+function endpointCard(path, method, detail) {
+  const card = el("div", "endpoint");
+  const head = el("div", "head");
+  head.appendChild(el("span", "method " + method, method.toUpperCase()));
+  head.appendChild(el("span", "path", path));
+  const required = (detail.parameters || []).filter((p) => p.required).map((p) => p.name);
+  if (required.length) head.appendChild(el("span", "tag", "参数：" + required.join(", ")));
+  head.appendChild(el("span", "muted", detail.summary || ""));
+  card.appendChild(head);
+
+  if (detail.parameters && detail.parameters.length) {
+    const params = el("div", "params");
+    detail.parameters.forEach((p) => params.appendChild(el("code", null, `${p.name}${p.required ? "*" : ""}`)));
+    card.appendChild(params);
+  }
+
+  const pre = el("pre", "log hidden");
+  if (method === "get") {
+    const btn = el("button", "small ghost", "试一下");
+    btn.style.marginTop = "8px";
+    btn.addEventListener("click", async () => {
+      btn.classList.add("loading");
+      try {
+        const res = await fetch(path);
+        const text = await res.text();
+        let pretty = text;
+        try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch (err) { pretty = text; }
+        pre.textContent = pretty.slice(0, 4000);
+        pre.classList.remove("hidden");
+      } catch (err) {
+        pre.textContent = String(err);
+        pre.classList.remove("hidden");
+      } finally {
+        btn.classList.remove("loading");
+      }
+    });
+    card.appendChild(btn);
+  }
+  card.appendChild(pre);
+  return card;
+}
+
+loadSpec();
+</script>
+<script>
+(async () => {
+  try {
+    const info = await fetch("/api/agent/info").then((r) => r.json());
+    document.getElementById("agent-key").value = info.api_key || "";
+    const hint = document.getElementById("agent-hint");
+    hint.textContent = "";
+    [`基址 ${info.base}`, info.endpoints.sing, info.endpoints.status].forEach((line, i) => {
+      if (i) hint.appendChild(document.createElement("br"));
+      hint.appendChild(document.createTextNode(line));
+    });
+  } catch (err) {
+    document.getElementById("agent-key").placeholder = "读取失败：" + err.message;
+  }
+  document.getElementById("agent-copy").addEventListener("click", async () => {
+    const value = document.getElementById("agent-key").value;
+    try {
+      await navigator.clipboard.writeText(value);
+      document.getElementById("agent-hint").textContent = "已复制到剪贴板";
+    } catch {
+      document.getElementById("agent-key").select();
+      document.execCommand("copy");
+      document.getElementById("agent-hint").textContent = "已复制（兼容模式）";
+    }
+  });
+})();
+</script>
+</body>
+</html>

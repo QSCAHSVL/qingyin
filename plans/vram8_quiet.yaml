@@ -1,0 +1,25 @@
+id: vram8_quiet
+name: "8G 显存 · 安静低功耗"
+tier: 8
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 7.5
+  max_vram_gb: 9.9
+  min_disk_gb: 20
+  needs_train: optional
+scores: { quality: 3, speed: 3, space: 4, stability: 5 }
+params:
+  separate: { backend: local_uvr, local_model: hp2 }
+  convert: { backend: local_rvc, f0_method: rmvpe, index_rate: 0.7, protect: 0.5, chunk_seconds: 30 }
+  train: { epochs: 60, batch_size: 2 }
+  clip: { seconds: 45 }
+  mix: { normalize: true, target_lufs: -14 }
+estimate: { per_song_minutes: 6, vram_peak_gb: 4.6, disk_per_song_mb: 180, train_minutes: 70 }
+pros:
+  - "显存峰值只有 4.6G，风扇不吵、不烫手"
+  - "适合边跑边干别的"
+cons:
+  - "分离用轻量模型，伴奏会留一点人声"
+  - "单曲慢一点"
+explain: "笔记本 8G 想安静跑就选这个：分块缩到 30 秒、batch 降到 2，代价是慢一点、分离糙一点。"

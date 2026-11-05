@@ -1,0 +1,44 @@
+id: vram12_quality
+name: "12G+ 显存 · 高质量"
+tier: 12
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 11.5
+  max_vram_gb: 32
+  min_disk_gb: 50
+  needs_train: optional
+scores:
+  quality: 5
+  speed: 4
+  space: 3
+  stability: 5
+params:
+  separate:
+    backend: local_uvr
+    local_model: becruily
+    model: UVR-MDX-NET-Inst_HQ_4
+  convert:
+    backend: local_rvc
+    f0_method: rmvpe
+    index_rate: 0.9
+    protect: 0.4
+  train:
+    epochs: 150
+    batch_size: 8
+  clip:
+    seconds: 60
+  mix:
+    normalize: true
+    target_lufs: -12
+estimate:
+  per_song_minutes: 4
+  vram_peak_gb: 9.5
+  disk_per_song_mb: 340
+  train_minutes: 60
+pros:
+  - "显存富裕，可以用大 batch 和高质量分离，速度还不慢"
+  - "音质和稳定性都拉满"
+cons:
+  - "磁盘占用最大"
+explain: "12G 以上不用纠结：batch 8、训练 150 轮、分离用 HQ_4，速度和音质都能兼顾。"

@@ -1,0 +1,25 @@
+id: clipping
+symptom: "爆音、削波、音量顶到红，或者忽大忽小"
+applies_to: [mix]
+selected: lower_lufs
+recipes:
+  - id: lower_lufs
+    name: "整体降 2dB（推荐）"
+    how: "混音目标响度从 -14 降到 -16，给峰值留出余量"
+    cost: "不变"
+    risk: "手机外放会觉得小一点"
+    params: { mix: { target_lufs: -16 } }
+    evidence: "2026-11 实测：削波消失，人声齿音不再刺"
+  - id: limiter
+    name: "加限幅器"
+    how: "混音链里补一级 alimiter，峰值硬压到 -1dB"
+    cost: "不变"
+    risk: "压太狠会听出泵动感"
+    params: { mix: { limiter: true } }
+    experimental: true
+  - id: dry_vocal
+    name: "人声干声降一档"
+    how: "混音时人声音量从 2.0 降到 1.6，避免和伴奏叠加爆掉"
+    cost: "不变"
+    risk: "人声可能偏小"
+    params: { mix: { vocal_gain: 1.6 } }

@@ -1,0 +1,26 @@
+id: seam_noise
+symptom: "两段音频接缝处有咔哒声、爆音，或者换气声突然断了"
+applies_to: [convert, clip, full_segment]
+selected: warmup_model
+recipes:
+  - id: crossfade
+    name: "交叉淡化 30ms"
+    how: "在拼接点做等功率交叉淡化，把硬切变成渐变"
+    cost: "几乎不花时间，也不改音质"
+    risk: "淡化太长会吃掉辅音和尾音，听起来发虚"
+    params: { join_mode: crossfade }
+    evidence: "2026-10 实测：接缝咔哒声消失，但句尾气声被削掉一截，长句尤其明显"
+  - id: warmup_model
+    name: "预热裁边（推荐）"
+    how: "每段前后各多切 0.5 秒当预热，转换完只取模型进入稳态的中间段，接缝只留 4ms 微淡化"
+    cost: "多切一点、多花几秒，音质不受影响"
+    risk: "基本没有；预热太短（<0.2s）时仍可能残留轻微接缝"
+    params: { join_mode: trim, prewarm_seconds: 0.5 }
+    evidence: "2026-10-25 起作为默认方案：整首 8 段拼接，句尾和换气都保住，接缝听不出来"
+  - id: overlap_align
+    name: "重叠 + 相关性对齐（实验性）"
+    how: "两段重叠 100ms，按波形相关性找最佳拼接点再淡入"
+    cost: "要多算一次相关性，慢一点"
+    risk: "对齐失败时比原来更糟；遇到节拍强的段落容易错位"
+    params: { join_mode: trim, prewarm_seconds: 0.1 }
+    experimental: true

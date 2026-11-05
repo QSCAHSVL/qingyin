@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>卿音 · 本地翻唱流水线</title>
+  <link rel="stylesheet" href="/static/style.css?v=9" />
+</head>
+<body>
+<!-- 图标：24×24、stroke 1.75、圆角端点，统一一套 -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></symbol>
+  <symbol id="i-tasks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol>
+  <symbol id="i-library" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h5v16H4z"/><path d="M10 4h5v16h-5z"/><path d="m16.5 5 3.8 1-3.6 14-3.8-1z"/></symbol>
+  <symbol id="i-diagnose" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-5 3 10 2-5h7"/></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-api" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="m15 7 5 5-5 5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 2.4 5.1 5.6.7-4.1 3.9 1 5.6L12 16.8 7.1 19.3l1-5.6L4 9.8l5.6-.7z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.5" r=".8" fill="currentColor"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m10 6 6 6-6 6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7.5 11 4.5 4.5L16.5 11"/><path d="M5 20h14"/></symbol>
+  <symbol id="i-train" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18V9M9 18V5M14 18v-7M19 18V8"/><path d="M3 21h18"/></symbol>
+  <symbol id="i-log" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h6M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3.5v2M12 18.5v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3.5 12h2M18.5 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M3 12c2.5 0 2.5-6 5-6s2.5 12 5 12 2.5-6 5-6 2.5 3 3 3"/></symbol>
+</svg>
+
+<a class="skip-link" href="#main">跳到主内容</a>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">音</div>
+      <div>
+        <h1>卿音</h1>
+        <small>COVER PIPELINE</small>
+      </div>
+    </div>
+    <nav class="nav" id="nav" aria-label="主导航">
+      <a data-page="home" class="active"><svg><use href="#i-home"/></svg>开始</a>
+      <a data-page="search"><svg><use href="#i-search"/></svg>找歌</a>
+      <a data-page="sing"><svg><use href="#i-mic"/></svg>翻唱</a>
+      <a data-page="train"><svg><use href="#i-train"/></svg>训练</a>
+      <a data-page="jobs"><svg><use href="#i-tasks"/></svg>任务</a>
+      <a data-page="library"><svg><use href="#i-library"/></svg>资源库</a>
+      <a data-page="fix"><svg><use href="#i-diagnose"/></svg>诊断</a>
+      <a data-page="plan"><svg><use href="#i-plan"/></svg>方案</a>
+      <a data-page="logs"><svg><use href="#i-log"/></svg>日志</a>
+      <a data-page="settings"><svg><use href="#i-gear"/></svg>设置</a>
+      <a href="/docs" target="_blank"><svg><use href="#i-api"/></svg>API</a>
+    </nav>
+    <div class="foot">
+      <div id="conn">连接中…</div>
+      <div id="foot-version"></div>
+      <button class="theme-toggle" id="theme-toggle" type="button">主题：跟随系统</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <!-- 开始 -->
+    <section class="page active" id="page-home">
+      <div class="page-head">
+        <h2>开始</h2>
+        <p>填个歌名就能出成品；想自己配环境、选方案，往下走。</p>
+      </div>
+
+      <div class="card">
+        <h3>一键翻唱</h3>
+        <div class="row">
+          <input type="search" id="oneclick-input" placeholder="输入歌名，自动找最合适的源并开始翻唱" style="flex:1;min-width:320px" />
+          <button class="primary" id="oneclick-go"><svg><use href="#i-play"/></svg>一键翻唱</button>
+          <label class="muted"><input type="checkbox" id="oneclick-full" /> 全曲</label>
+        </div>
+        <div class="muted" style="margin-top:8px">自动挑第一个能下载的结果（B站优先），下完直接跑分离、转换、混音。</div>
+        <div id="oneclick-progress" class="progress hidden"><div class="bar"></div><span></span></div>
+        <div id="oneclick-result"></div>
+      </div>
+
+      <div class="card" id="setup-card" style="margin-top:14px">
+        <h3>环境配置 <span class="muted" id="setup-total"></span></h3>
+        <div class="muted" id="setup-summary">还没检测。点「检测环境」看看这台机器能跑什么。</div>
+        <div class="steps" id="setup-steps" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="primary" id="setup-detect"><svg><use href="#i-search"/></svg>检测环境</button>
+          <button class="primary" id="setup-run" disabled><svg><use href="#i-download"/></svg>确认并自动配置</button>
+          <label class="field">人声分离
+            <select id="setup-separation">
+              <option value="auto">自动推荐</option>
+              <option value="uvr">UVR（质量优先）</option>
+              <option value="demucs">Demucs（轻量备选）</option>
+              <option value="both">两个都装</option>
+              <option value="none">不分离</option>
+            </select>
+          </label>
+          <button class="ghost small" id="metrics-refresh"><svg><use href="#i-refresh"/></svg>刷新指标</button>
+          <span class="muted" id="setup-hint"></span>
+        </div>
+        <div id="setup-progress" class="progress hidden"><div class="bar"></div><span></span></div>
+      </div>
+
+      <div class="grid cols-4" id="home-metrics" style="margin-top:14px"></div>
+
+      <div class="card" style="margin-top:14px">
+        <h3>进度 <span class="muted" id="home-progress-text"></span></h3>
+        <div class="steps" id="home-steps"></div>
+      </div>
+
+      <div class="card">
+        <h3>这台机器</h3>
+        <pre class="log" id="home-probe">加载中…</pre>
+      </div>
+    </section>
+
+    <!-- 找歌 -->
+    <section class="page" id="page-search">
+      <div class="page-head">
+        <h2>在线找歌</h2>
+        <p>四个平台一起搜；标准音质直接下，高音质要接自己的解密服务。</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <input type="search" id="search-input" placeholder="歌名、歌手，或贴 B站/抖音 链接" />
+          <button class="primary" id="search-go"><svg><use href="#i-search"/></svg>搜索</button>
+          <button class="ghost small" id="search-hint">试试「千年食谱颂」</button>
+          <label class="field" style="margin-left:auto">音质
+            <select id="search-quality">
+              <option value="standard">标准（mp3/m4a，免解密）</option>
+              <option value="high">高音质（需解密插件）</option>
+            </select>
+          </label>
+        </div>
+        <div class="row" id="search-sources"></div>
+        <div class="results" id="search-results"></div>
+      </div>
+    </section>
+
+    <!-- 翻唱 -->
+    <section class="page" id="page-sing">
+      <div class="page-head">
+        <h2>翻唱</h2>
+        <p>给文件、文件夹或歌名；文件夹会先列曲目让你勾。</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <label class="field" style="flex:1;min-width:300px">音频文件 / 文件夹
+            <input id="sing-input" placeholder="D:\音乐\某首歌.flac 或 D:\音乐\某个文件夹" />
+          </label>
+          <button class="ghost" data-pick="#sing-input" data-title="选择音频文件或文件夹"
+                 >选择…</button>
+          <label class="field">或者歌名
+            <input id="sing-song" placeholder="歌名" />
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">输出名
+            <input id="sing-name" placeholder="留空用文件名" />
+          </label>
+          <label class="muted"><input type="checkbox" id="sing-full" /> 全曲切段</label>
+          <label class="muted"><input type="checkbox" id="sing-force" /> 忽略缓存</label>
+          <button class="primary" id="sing-start"><svg><use href="#i-mic"/></svg>开始</button>
+        </div>
+        <div id="sing-progress" class="progress hidden"><div class="bar"></div><span></span></div>
+        <div id="sing-result"></div>
+      </div>
+    </section>
+
+    <!-- 任务 -->
+    <section class="page" id="page-jobs">
+      <div class="page-head">
+        <h2>任务</h2>
+        <p>跑着的能随时取消；点一行看日志。</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <button class="small" id="jobs-refresh"><svg><use href="#i-refresh"/></svg>刷新</button>
+          <span class="muted" id="jobs-count"></span>
+        </div>
+        <table class="table" id="jobs-table">
+          <thead><tr><th>任务</th><th>状态</th><th>进度</th><th>说明</th><th>用时</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>日志</h3>
+        <pre class="log" id="job-log">点上面的任务看日志</pre>
+      </div>
+    </section>
+
+    <!-- 资源库 -->
+    <section class="page" id="page-library">
+      <div class="page-head">
+        <h2>资源库</h2>
+        <p>勾选批量处理；点名字定位到资源管理器；行尾按钮单个操作。</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div class="segmented" id="lib-kinds">
+            <button data-kind="model">模型</button>
+            <button data-kind="song">工程</button>
+            <button data-kind="output">成品</button>
+            <button data-kind="source">音源</button>
+            <button data-kind="voice">音色</button>
+            <button data-kind="favorite">收藏</button>
+          </div>
+          <input id="lib-q" placeholder="搜索名字" style="width:200px" />
+          <button class="small ghost" id="lib-scan"><svg><use href="#i-refresh"/></svg>重建索引</button>
+          <span class="spacer"></span>
+          <label class="field">每页
+            <select id="lib-size">
+              <option>10</option>
+              <option selected>20</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+          </label>
+        </div>
+        <div class="muted" id="lib-summary" style="margin-top:10px"></div>
+        <div class="row batch-bar hidden" id="lib-batch">
+          <span class="muted" id="lib-selected-text">已选 0 项</span>
+          <button class="small" id="lib-fav"><svg><use href="#i-star"/></svg>收藏</button>
+          <button class="small" id="lib-unfav">取消收藏</button>
+          <button class="small ghost" id="lib-del"><svg><use href="#i-trash"/></svg>删除</button>
+          <button class="small ghost" id="lib-clear">取消选择</button>
+        </div>
+        <table class="table compact" id="lib-table">
+          <thead>
+            <tr>
+              <th style="width:34px"><input type="checkbox" id="lib-all" aria-label="全选" /></th>
+              <th>名字</th><th style="width:90px">大小</th><th>路径</th><th style="width:150px">操作</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="row pager">
+          <button class="small ghost" id="page-prev"><svg><use href="#i-left"/></svg>上一页</button>
+          <span class="muted" id="page-info">第 1 / 1 页</span>
+          <button class="small ghost" id="page-next">下一页<svg><use href="#i-right"/></svg></button>
+          <label class="muted">跳到 <input id="page-jump" type="number" min="1" /> 页</label>
+          <button class="small" id="page-go">跳转</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 诊断 -->
+    <section class="page" id="page-fix">
+      <div class="page-head">
+        <h2>诊断</h2>
+        <p>选症状、勾解法，同一段素材各做一版，听完再定。</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <label class="field">症状
+            <select id="fix-symptom"></select>
+          </label>
+          <label class="field">对比时长(秒)
+            <input id="fix-seconds" type="number" value="60" min="10" max="180" />
+          </label>
+          <button class="primary" id="fix-run"><svg><use href="#i-diagnose"/></svg>生成对比</button>
+        </div>
+        <div class="row">
+          <label class="field" style="flex:1">用哪首工程（可滚动）
+            <select id="fix-song" size="6" class="scroll-select"></select>
+          </label>
+        </div>
+        <div id="fix-options" class="steps" style="margin-top:12px"></div>
+        <div id="fix-progress" class="progress hidden"><div class="bar"></div><span></span></div>
+      </div>
+      <div class="grid cols-2" id="fix-results" style="margin-top:14px"></div>
+    </section>
+
+    <!-- 方案 -->
+    <section class="page" id="page-plan">
+      <div class="page-head">
+        <h2>方案</h2>
+        <p>按显卡和显存推荐；随时能撤回到默认。</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <label class="field">最在意
+            <select id="prefer">
+              <option value="stability">稳定不折腾</option>
+              <option value="quality">音质</option>
+              <option value="speed">速度</option>
+              <option value="space">省空间</option>
+            </select>
+          </label>
+          <label class="field">会训练音色
+            <select id="will-train">
+              <option value="unsure">不确定</option>
+              <option value="yes">会</option>
+              <option value="no">不会</option>
+            </select>
+          </label>
+          <label class="field">显存预算(G)
+            <input id="max-vram" type="number" value="8" min="0" step="1" />
+          </label>
+          <label class="field">磁盘预算(G) <input id="disk" type="number" value="30" min="5" /></label>
+          <label class="field">单曲可等(分钟) <input id="patience" type="number" value="10" min="1" /></label>
+          <button id="load-plan"><svg><use href="#i-refresh"/></svg>重新推荐</button>
+          <button class="ghost" id="plan-all"><svg><use href="#i-plan"/></svg>全部方案</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <span class="muted" id="current-plan">当前方案：未设置</span>
+          <button class="small ghost" id="clear-plan">撤销方案</button>
+          <span class="muted" style="margin-left:auto">想自己定？看 <a class="link" href="/docs/plans" target="_blank">方案说明</a>，模板在 plans/_template.yaml</span>
+        </div>
+      </div>
+      <div class="grid cols-2" id="plan-cards" style="margin-top:14px"></div>
+      <details class="card" id="assets-box" style="margin-top:14px">
+        <summary id="assets-summary">这套方案还要准备什么？</summary>
+        <div id="assets-list" style="margin-top:10px"></div>
+      </details>
+      <details class="card" id="excluded-box" style="margin-top:14px">
+        <summary>为什么没有别的方案？</summary>
+        <div id="excluded-list" class="muted" style="margin-top:10px"></div>
+      </details>
+    </section>
+
+    <!-- 训练 -->
+    <section class="page" id="page-train">
+      <div class="page-head">
+        <h2>训练</h2>
+        <p>丢一目录素材进来，训出自己的音色；训完自动登记版本，随时能切回旧的。</p>
+      </div>
+
+      <div class="card">
+        <h3>素材</h3>
+        <div class="row">
+          <label class="field" style="flex:1;min-width:340px">素材目录
+            <input id="train-data" placeholder="D:\我的录音\唱歌素材" />
+          </label>
+          <button class="ghost" data-pick="#train-data" data-title="选择训练素材目录"
+                 >选择…</button>
+          <button class="ghost" id="train-preview-btn">预检</button>
+        </div>
+        <div class="muted" style="margin-top:8px">支持 wav / flac / mp3 / m4a / ogg，子目录也会扫。建议 10 分钟以上干净人声。</div>
+        <div id="train-preview" class="steps" style="margin-top:10px"></div>
+      </div>
+
+      <div class="card">
+        <h3>参数</h3>
+        <div class="row">
+          <label class="field">音色名
+            <input id="train-name" placeholder="例如 yuzhou-v3" />
+          </label>
+          <label class="field">轮数
+            <input id="train-epochs" type="number" value="80" min="20" step="10" />
+          </label>
+          <label class="field">batch
+            <input id="train-batch" type="number" value="4" min="1" max="32" />
+          </label>
+          <label class="field">采样率
+            <select id="train-rate">
+              <option value="40000" selected>40000（RVC v2 常用）</option>
+              <option value="48000">48000</option>
+              <option value="32000">32000</option>
+            </select>
+          </label>
+          <label class="muted"><input type="checkbox" id="train-clean" checked /> 训练前清洗</label>
+          <button class="primary" id="train-start"><svg><use href="#i-play"/></svg>开始训练</button>
+        </div>
+        <div id="train-progress" class="progress hidden"><div class="bar"></div><span></span></div>
+        <div id="train-result"></div>
+      </div>
+
+      <details class="card" id="train-config-card">
+        <summary id="train-config-summary">训练命令（没配过就点这里）</summary>
+        <div style="margin-top:12px">
+          <div class="muted" style="margin-bottom:8px">
+            这是真正执行训练的命令模板。占位符：<code>{dataset}</code> <code>{name}</code> <code>{model_name}</code>
+            <code>{epochs}</code> <code>{batch}</code> <code>{sample_rate}</code> <code>{rvc_dir}</code> <code>{rvc_python}</code>
+          </div>
+          <div class="row">
+            <button class="ghost small" id="train-fill-rvc">用 RVC 官方 train.py 模板</button>
+            <button class="ghost small" id="train-fill-own">用 train_model.py 模板</button>
+          </div>
+          <label class="field" style="margin-top:10px">命令
+            <input id="train-command" placeholder="python train_model.py --data {dataset} --epochs {epochs} --model-name {model_name}" />
+          </label>
+          <div class="row">
+            <label class="field">默认模型名
+              <input id="train-model-name" placeholder="留空用音色名" />
+            </label>
+            <label class="field" style="flex:1">产出目录（可选，多个用分号隔开）
+              <input id="train-output-dirs" placeholder="E:\...\RVC\assets\weights" />
+            </label>
+            <button class="primary" id="train-save-config">保存命令</button>
+          </div>
+          <div class="muted" id="train-config-hint" style="margin-top:8px"></div>
+        </div>
+      </details>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>已有的音色版本</h3>
+          <div class="actions">
+            <button class="ghost" id="train-import"><svg><use href="#i-download"/></svg>导入模型</button>
+          </div>
+        </div>
+        <div id="train-versions" class="steps"></div>
+      </div>
+    </section>
+
+    <!-- 日志 -->
+    <section class="page" id="page-logs">
+      <div class="page-head">
+        <h2>日志</h2>
+        <p>服务与任务的运行记录；排查问题时先看这里。</p>
+      </div>
+      <div class="card">
+        <div class="toolbar">
+          <select id="log-file" style="min-width:260px"></select>
+          <button class="small ghost" id="log-refresh"><svg><use href="#i-refresh"/></svg>刷新</button>
+          <span class="spacer"></span>
+          <label class="field">行数
+            <select id="log-lines">
+              <option>100</option>
+              <option selected>300</option>
+              <option>1000</option>
+            </select>
+          </label>
+        </div>
+        <pre id="log-body" class="log-body">选一个日志文件…</pre>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section class="page" id="page-settings">
+      <div class="page-head">
+        <h2>设置</h2>
+        <p>数据目录、服务与接口；改完要重启生效。</p>
+      </div>
+
+      <div class="card">
+        <h3>数据目录</h3>
+        <div class="muted" style="margin-bottom:12px">留空表示用默认（项目目录下的 work / output / models）。可以填绝对路径，比如 D:/QingYin/work。</div>
+        <div class="row">
+          <label class="field" style="flex:1;min-width:320px">工程与索引（work）
+            <input id="set-work" placeholder="./work" />
+          </label>
+          <button class="ghost" data-pick="#set-work" data-title="选择工程目录">选择…</button>
+          <span class="muted" id="set-work-info" style="flex-basis:100%"></span>
+        </div>
+        <div class="row">
+          <label class="field" style="flex:1;min-width:320px">最终导出（output）
+            <input id="set-output" placeholder="./output" />
+          </label>
+          <button class="ghost" data-pick="#set-output" data-title="选择导出目录">选择…</button>
+          <span class="muted" id="set-output-info" style="flex-basis:100%"></span>
+        </div>
+        <div class="row">
+          <label class="field" style="flex:1;min-width:320px">模型与版本（models）
+            <input id="set-models" placeholder="./models" />
+          </label>
+          <button class="ghost" data-pick="#set-models" data-title="选择模型目录">选择…</button>
+          <span class="muted" id="set-models-info" style="flex-basis:100%"></span>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button class="primary" id="set-save"><svg><use href="#i-check"/></svg>保存</button>
+          <button class="ghost small" id="set-reset">填回当前值</button>
+          <span class="muted" id="set-hint">改完要重启卿音才生效；换目录后旧索引不会跟着走，需要到资源库点「重建索引」。</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>服务信息</h3>
+        <div class="grid cols-2" id="set-service"></div>
+      </div>
+
+      <div class="card">
+        <h3>发布与备份</h3>
+        <div class="form-row">
+          <label class="check"><input type="checkbox" id="set-send-enabled" /> 出成品后自动发布</label>
+          <label class="field" style="flex:1 1 260px">发布目标
+            <input id="set-send-target" placeholder="group:123456 或 private:10001" />
+          </label>
+          <label class="field" style="flex:0 0 140px">用哪个号
+            <select id="set-send-account">
+              <option value="main">主号</option>
+              <option value="second">二套</option>
+            </select>
+          </label>
+          <div class="actions">
+            <button class="primary" id="set-send-save">保存</button>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:16px">
+          <div class="actions" style="margin-left:0">
+            <button class="ghost" id="set-backup"><svg><use href="#i-download"/></svg>备份数据目录</button>
+            <span class="muted" id="set-backup-hint">把 work / output / models 打成 zip，放到项目 backups/ 下。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- 通用弹窗 -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-title"></h3>
+      <button class="ghost small" id="modal-close" aria-label="关闭"><svg><use href="#i-x"/></svg>关闭</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+<script src="/static/app.js?v=9"></script>
+</body>
+</html>

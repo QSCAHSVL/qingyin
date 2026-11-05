@@ -1,0 +1,19 @@
+# 复制成 configs/local.yaml 后修改（这个文件不会进仓库）
+
+source:
+  # 歌名搜索目录，可以写多个
+  search_dirs:
+    - D:/music
+    - E:/music/flac
+
+convert:
+  model: mysing          # models/ 下的模型名
+  # 接了 RVC 命令行就填这里，占位符见 docs/TRAIN.md
+  # command: python D:/RVC/infer_cli.py --input {input} --output {output} --model {model} --pitch {pitch}
+
+train:
+  # 填了才会真正执行训练，否则只准备数据集
+  # command: python D:/RVC/train_cli.py --data {dataset} --name {name} --epochs {epochs}
+
+mix:
+  target_lufs: -14

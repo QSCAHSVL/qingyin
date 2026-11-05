@@ -1,0 +1,86 @@
+# cover-pipeline 默认配置
+# 所有路径都可以用相对路径（相对项目根目录）或绝对路径。
+# 想改本机设置，请新建 configs/local.yaml 覆盖，不要改这个文件（便于以后升级）。
+
+project:
+  work_dir: ./work          # 中间产物（源文件/人声/伴奏/成品）
+  output_dir: ./output      # 最终导出
+  models_dir: ./models      # 训练与推理模型
+  log_level: info
+
+device:
+  type: auto                # auto / cuda / cpu
+  gpu_index: 0
+  # 显存不足时自动降级的门槛（GB）
+  min_vram_gb: 4
+
+tools:
+  # ffmpeg/ffprobe 不在 PATH 时，填它们的 bin 目录（绝对路径）
+  ffmpeg_dir: ""
+  # 本地已部署的 RVC / UVR：留空则自动探测；填了就用你指定的
+  rvc_dir: ""            # RVC 根目录（含 infer/cli.py）
+  rvc_python: ""         # RVC 的 python（.venv\Scripts\python.exe）
+  uvr_script: ""         # uvr_sep.py 的路径
+  uvr_python: ""         # 跑 uvr_sep.py 的 python（一般是 GPT-SoVITS 的 venv）
+  uvr_model: becruily    # roformer / hp2 / becruily
+
+source:
+  # 内置：local_file。其他来源请放到 plugins/，本项目不内置。
+  adapter: local_file
+  search_dirs: []           # 本地音频搜索目录（可多个）
+
+separate:
+  # 人声分离：local_uvr（用你本地已装的 UVR5 helper）/ uvr（pip 包）/ none
+  backend: local_uvr
+  model: UVR-MDX-NET-Inst_HQ_3
+  keep_backing: true        # 保留伴奏
+
+convert:
+  # 音色转换：local_rvc（用你本地已装的 RVC）/ rvc（pip 包）/ none
+  backend: local_rvc
+  model: default            # models/ 下的模型名（不含扩展名），或直接给 .pth 绝对路径
+  pitch: 0                  # 手动变调半音；0 = 用 auto_pitch
+  auto_pitch: true
+  auto_pitch_range: [-3, 3]
+  protect: 0.5
+  index_rate: 0.75
+  f0_method: rmvpe
+  chunk_seconds: 0          # 0 = 按显存自动挑；>0 强制指定每段时长
+  join_mode: trim           # trim（预热裁边，默认）/ crossfade（老办法）
+  prewarm_seconds: 0.3      # trim 模式下每段多切的预热长度
+
+mix:
+  vocal_gain_db: 0
+  backing_gain_db: 0
+  normalize: true
+  target_lufs: -14
+
+clip:
+  mode: chorus              # chorus / full / range
+  seconds: 45
+  full_segment_seconds: 55  # full 模式下切段长度
+  energy_window: 0.5
+
+train:
+  epochs: 80
+  batch_size: 4
+  sample_rate: 40000
+  min_minutes_warn: 10      # 少于这个时长给出提示
+  clean: true               # 训练前自动清洗（去静音/降噪/切分）
+  clean_threshold_db: -40   # 低于这个平均音量（dB）的片段会被丢掉
+  # 真正训练要在这里填命令模板；占位符：{dataset} {name} {epochs} {batch} {sample_rate}
+  # 例（RVC 官方训练入口）：
+  #   command: "{rvc_python} {rvc_dir}\infer\train.py --exp_name {name} --data {dataset} --epochs {epochs}"
+  # 例（自己的训练脚本）：
+  #   command: "E:\path\to\python.exe E:\path\to\train_model.py --data {dataset} --name {name} --epochs {epochs}"
+  command: ""
+
+send:
+  enabled: false
+  target: ""                # 例：group:123456 / private:10001
+  account: main
+download:
+  # 权重下载源：默认走 hf-mirror（国内可达），官方 HF 作为兜底
+  mirror: https://hf-mirror.com
+  # 没有本机 RVC 时，权重放这里；留空则用 models/assets
+  assets_dir: ""

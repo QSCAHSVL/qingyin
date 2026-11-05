@@ -1,0 +1,45 @@
+id: cpu_only
+name: "无独显 · 仅推理"
+tier: 0
+advanced: false
+for:
+  gpu_required: false
+  min_vram_gb: 0
+  max_vram_gb: 0
+  min_disk_gb: 8
+  needs_train: no
+scores:
+  quality: 2
+  speed: 1
+  space: 4
+  stability: 4
+params:
+  separate:
+    backend: local_uvr
+    local_model: hp2
+    model: UVR-MDX-NET-Inst_Main
+  convert:
+    backend: local_rvc
+    f0_method: rmvpe
+    index_rate: 0.7
+    protect: 0.5
+  train:
+    epochs: 0
+    batch_size: 1
+  clip:
+    seconds: 45
+  mix:
+    normalize: true
+    target_lufs: -14
+estimate:
+  per_song_minutes: 25
+  vram_peak_gb: 0
+  disk_per_song_mb: 180
+  train_minutes: 0
+pros:
+  - "什么机器都能跑，不需要显卡"
+  - "磁盘占用小"
+cons:
+  - "一首歌二十分钟以上"
+  - "不能训练音色，只能用别人给的模型"
+explain: "没有独显时只能这样。分离和转换都走 CPU，能出成品，但一首要等很久，建议一次多丢几首排队。"

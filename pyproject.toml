@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cover-pipeline"
+version = "0.2.0"
+description = "一条命令完成翻唱全流程：训练、分离、转换、混音、挑段"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "cover-pipeline contributors" }]
+keywords = ["rvc", "cover", "voice-conversion", "uvr", "audio", "pipeline"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = [
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+gui = ["gradio>=4.0"]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[project.scripts]
+cover = "cover_pipeline.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 110
+target-version = "0.2.0"

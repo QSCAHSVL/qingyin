@@ -1,0 +1,24 @@
+id: vram10_balanced
+name: "10G 显存 · 均衡"
+tier: 10
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 9.5
+  max_vram_gb: 11.9
+  min_disk_gb: 30
+  needs_train: optional
+scores: { quality: 4, speed: 4, space: 3, stability: 5 }
+params:
+  separate: { backend: local_uvr, local_model: becruily }
+  convert: { backend: local_rvc, f0_method: rmvpe, index_rate: 0.8, protect: 0.45 }
+  train: { epochs: 100, batch_size: 6 }
+  clip: { seconds: 50 }
+  mix: { normalize: true, target_lufs: -13 }
+estimate: { per_song_minutes: 4, vram_peak_gb: 8.4, disk_per_song_mb: 260, train_minutes: 55 }
+pros:
+  - "显存宽裕，batch 能开大一点，训练比 8G 快"
+  - "分离和转换都留了余量，边跑边看网页也不慌"
+cons:
+  - "比 8G 均衡多吃一点电"
+explain: "10G 是 4060Ti / 3080 这类卡，参数往音质偏一点也不会爆显存。"

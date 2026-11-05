@@ -1,0 +1,45 @@
+id: svc_advanced
+name: "进阶 · SVC 音色转换（12G+）"
+tier: 12
+advanced: true
+for:
+  gpu_required: true
+  min_vram_gb: 11.5
+  max_vram_gb: 32
+  min_disk_gb: 60
+  needs_train: yes
+scores:
+  quality: 5
+  speed: 2
+  space: 2
+  stability: 2
+params:
+  separate:
+    backend: local_uvr
+    local_model: becruily
+    model: UVR-MDX-NET-Inst_HQ_4
+  convert:
+    backend: local_rvc
+    f0_method: rmvpe
+    index_rate: 0.8
+    protect: 0.5
+  train:
+    epochs: 200
+    batch_size: 4
+  clip:
+    seconds: 60
+  mix:
+    normalize: true
+    target_lufs: -12
+estimate:
+  per_song_minutes: 9
+  vram_peak_gb: 11.0
+  disk_per_song_mb: 420
+  train_minutes: 180
+pros:
+  - "音质上限比 RVC 高，气声和细节更自然"
+cons:
+  - "训练要三小时，显存吃满 11G"
+  - "生态分散，版本兼容差，出问题不好查"
+  - "小白第一次用成功率明显更低"
+explain: "只有你已经跑通过 RVC、显存 12G 以上、并且愿意为音质多花时间时才选它。第一次用不建议从这里开始。"

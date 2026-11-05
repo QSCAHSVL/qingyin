@@ -1,0 +1,15 @@
+# 均衡预设（默认推荐）
+separate:
+  backend: uvr
+  model: UVR-MDX-NET-Inst_HQ_3
+convert:
+  f0_method: rmvpe
+  index_rate: 0.75
+  protect: 0.5
+mix:
+  normalize: true
+  target_lufs: -14
+train:
+  epochs: 80
+clip:
+  seconds: 45

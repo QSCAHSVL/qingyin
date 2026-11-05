@@ -1,0 +1,15 @@
+# 高质预设：慢，但分离与咬字更好
+separate:
+  backend: uvr
+  model: UVR-MDX-NET-Inst_HQ_4
+convert:
+  f0_method: rmvpe
+  index_rate: 0.9
+  protect: 0.33
+mix:
+  normalize: true
+  target_lufs: -12
+train:
+  epochs: 150
+clip:
+  seconds: 60

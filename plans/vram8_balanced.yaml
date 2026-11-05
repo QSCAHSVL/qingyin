@@ -1,0 +1,44 @@
+id: vram8_balanced
+name: "8G 显存 · 均衡（推荐）"
+tier: 8
+advanced: false
+for:
+  gpu_required: true
+  min_vram_gb: 7.5
+  max_vram_gb: 9.9
+  min_disk_gb: 25
+  needs_train: optional
+scores:
+  quality: 4
+  speed: 4
+  space: 3
+  stability: 5
+params:
+  separate:
+    backend: local_uvr
+    local_model: becruily
+    model: UVR-MDX-NET-Inst_HQ_3
+  convert:
+    backend: local_rvc
+    f0_method: rmvpe
+    index_rate: 0.75
+    protect: 0.5
+  train:
+    epochs: 80
+    batch_size: 4
+  clip:
+    seconds: 45
+  mix:
+    normalize: true
+    target_lufs: -14
+estimate:
+  per_song_minutes: 4
+  vram_peak_gb: 6.8
+  disk_per_song_mb: 240
+  train_minutes: 50
+pros:
+  - "训练 80 轮约 50 分钟，8G 卡的标准姿势"
+  - "分离和转换都不踩显存红线，成功率高"
+cons:
+  - "音质不是极限，追求更好的话要上 12G"
+explain: "8G 是最常见的配置，这套参数是实测跑得最稳的组合：分离用 HQ 模型，训练 80 轮 batch 4。"

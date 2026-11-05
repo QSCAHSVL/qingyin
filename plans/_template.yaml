@@ -1,0 +1,64 @@
+# 自定义方案模板
+#
+# 用法：
+#   1. 复制这个文件成 plans/你的方案id.yaml（文件名随意，id 必须唯一）
+#   2. 改 id / name / for / scores / params / estimate
+#   3. 回到界面点「重新推荐」，或者命令行 cover plan，就会出现
+#
+# 注意：文件名以 "_" 开头的不会被当成方案（这个模板就是），所以复制后记得改名字。
+
+id: my_plan                  # 唯一标识，命令行 --apply 用的就是它
+name: "我的方案"              # 卡片上显示的名字
+tier: 8                      # 只是排序/分档用的数字，不参与筛选
+advanced: false              # true 的话默认不给新手推荐
+
+# 适用范围（硬条件，不满足直接排除）
+for:
+  gpu_required: true         # 没有独显的机器会排除这套
+  min_vram_gb: 7.5           # 显存下限
+  max_vram_gb: 9.9           # 显存上限（机器显存比这大也会被排除，因为"有更合适的"）
+  min_disk_gb: 20            # 磁盘至少要剩多少 G
+  needs_train: optional      # yes / no / optional：这套方案能不能/必须训练音色
+
+# 打分（1~5，数字越大越好），会按你在界面选的「最在意」加权
+scores:
+  quality: 4
+  speed: 4
+  space: 3
+  stability: 5
+
+# 真正会被写进 configs/local.yaml 的参数（只覆盖这五段）
+params:
+  separate:
+    backend: local_uvr       # local_uvr（用本机 UVR）/ uvr（pip 包）/ none
+    local_model: becruily    # becruily / hp2
+  convert:
+    backend: local_rvc       # local_rvc / rvc / none
+    f0_method: rmvpe
+    index_rate: 0.75
+    protect: 0.5
+    chunk_seconds: 0         # 0 = 按显存自动挑分块时长
+    join_mode: trim          # trim（预热裁边）/ crossfade
+    prewarm_seconds: 0.3
+  train:
+    epochs: 80
+    batch_size: 4
+  clip:
+    seconds: 45
+  mix:
+    normalize: true
+    target_lufs: -14
+
+# 预估（也参与筛选：显存峰值会跟界面上的「显存预算」比）
+estimate:
+  per_song_minutes: 4
+  vram_peak_gb: 6.8
+  disk_per_song_mb: 240
+  train_minutes: 50
+
+# 卡片上显示的利弊（这几条会原样展示给你看）
+pros:
+  - "写清这套方案好在哪"
+cons:
+  - "也写清代价，别只夸"
+explain: "一句话解释这套方案适合谁。"

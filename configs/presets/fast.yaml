@@ -1,0 +1,13 @@
+# 快速预设：能跑就行，优先速度
+separate:
+  backend: uvr
+  model: UVR-MDX-NET-Inst_Main
+convert:
+  f0_method: rmvpe
+  index_rate: 0.5
+mix:
+  normalize: true
+train:
+  epochs: 40
+clip:
+  seconds: 40

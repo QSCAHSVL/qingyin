@@ -1,0 +1,25 @@
+id: voice_unlike
+symptom: "唱出来不像目标音色，像原唱"
+applies_to: [convert]
+selected: raise_index
+recipes:
+  - id: raise_index
+    name: "提高 index_rate（推荐）"
+    how: "index_rate 0.75→0.9，多用特征库"
+    cost: "不变"
+    risk: "素材少时会有点电音感"
+    params: { convert: { index_rate: 0.9 } }
+    evidence: "音色素材 ≥10 分钟时效果最明显"
+  - id: lower_protect
+    name: "降低 protect"
+    how: "protect 0.5→0.35，让模型更多覆盖原声"
+    cost: "不变"
+    risk: "咬字会变糊"
+    params: { convert: { protect: 0.35 } }
+  - id: more_epochs
+    name: "重训更久（慢）"
+    how: "训练轮数从 80 提到 150，需要重新跑训练"
+    cost: "约 1.5 小时"
+    risk: "过拟合会失真"
+    params: { convert: { index_rate: 0.85 } }
+    experimental: true

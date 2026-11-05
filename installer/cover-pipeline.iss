@@ -1,4 +1,4 @@
-; 卿音 安装包（0.3.0）
+﻿; 卿音 安装包（0.3.0）
 ; 只装框架本身：RVC / UVR 复用本机已有环境，torch 等大依赖由 app 内「环境配置」按需安装。
 ; 编译：scripts\build-installer.ps1（需要 Inno Setup 6）
 
@@ -10,7 +10,7 @@
 [Setup]
 AppId={{6C1F8A22-7B3D-4E59-9A41-2E7B5F0C3D18}
 AppName={#AppName}
-AppVersion={#AppVersion}
+AppVersion=0.4.1
 AppPublisher=卿音项目
 AppPublisherURL=https://github.com/
 DefaultDirName={autopf}\QingYin

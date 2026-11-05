@@ -31,8 +31,14 @@ jobs:
           PYTHONPATH: src
         run: python -m unittest discover -s tests -t .
       - name: JS syntax
+        shell: pwsh
         run: |
-          for f in src/cover_pipeline/server/static/*.js; do node --check "$f"; done
+          $bad = 0
+          Get-ChildItem src/cover_pipeline/server/static/*.js | ForEach-Object {
+            node --check $_.FullName
+            if ($LASTEXITCODE -ne 0) { $bad = 1 }
+          }
+          if ($bad -ne 0) { exit 1 }
 
       - name: Packaging self-check
         env:

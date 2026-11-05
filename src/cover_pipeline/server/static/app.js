@@ -134,18 +134,35 @@ function metricCard(label, value, sub, ratio) {
 }
 
 let metricsReady = false;
+let metricsProbedAt = null;
 
 async function refreshMetrics(force = false) {
   try {
     const res = await api(`/api/resources${force ? "?refresh=1" : ""}`);
     renderMetrics(res);
     metricsReady = true;
+    metricsProbedAt = new Date();
+    const stamp = $("#home-metrics-time");
+    if (stamp) {
+      const hh = String(metricsProbedAt.getHours()).padStart(2, "0");
+      const mm = String(metricsProbedAt.getMinutes()).padStart(2, "0");
+      stamp.textContent = `指标检测于今天 ${hh}:${mm}${force ? "（刚刷新）" : ""}`;
+    }
     connFailures = 0;
     $("#conn").textContent = "已连接";
     $("#conn").style.color = "var(--ok)";
   } catch (err) {
     if (!(err && err.name === "AbortError")) connFailures += 1;
   }
+}
+
+function updateSetupRunHint() {
+  const btn = $("#setup-run");
+  const hint = $("#setup-run-hint");
+  if (!btn) return;
+  const enabled = !btn.disabled;
+  if (hint) hint.textContent = enabled ? "检测完成，可以确认配置" : "先检测环境，再确认配置";
+  btn.title = enabled ? "按检测结果写入配置" : "先点「检测环境」";
 }
 
 function renderMetricPlaceholders() {
@@ -156,7 +173,7 @@ function renderMetricPlaceholders() {
     const card = el("div", "card metric");
     card.appendChild(el("div", "label", label));
     card.appendChild(el("div", "value muted", "—"));
-    card.appendChild(el("div", "sub", "点「检测环境」"));
+    card.appendChild(el("div", "sub", "未检测 · 点「检测环境」"));
     box.appendChild(card);
   });
 }
@@ -197,7 +214,7 @@ async function loadHome() {
     const ob = await api("/api/onboarding");
     const steps = $("#home-steps");
     steps.innerHTML = "";
-    $("#home-progress-text").textContent = `${ob.done}/${ob.total}`;
+    $("#home-progress-text").textContent = `${ob.done}/${ob.total}${metricsReady ? "" : " · 指标未检测"}`;
     ob.steps.forEach((step, index) => {
       const node = el("div", "step" + (step.done ? " done" : ""));
       node.appendChild(el("div", "dot", step.done ? "✓" : String(index + 1)));
@@ -268,9 +285,11 @@ async function loadSetup(force = false) {
     if (!steps.length) {
       runBtn.disabled = true;
       runBtn.textContent = "环境已就绪";
+      updateSetupRunHint();
       return;
     }
     runBtn.disabled = false;
+    updateSetupRunHint();
     steps.forEach((step) => {
       const row = el("div", "step");
       const body = el("div", "body");
@@ -318,6 +337,7 @@ async function pollSetup() {
     btn.classList.remove("loading");
     btn.disabled = true;
     btn.textContent = "配置完成";
+    updateSetupRunHint();
     loadSetup();
     loadHome();
     return;
@@ -328,6 +348,7 @@ async function pollSetup() {
     const btn = $("#setup-run");
     btn.classList.remove("loading");
     btn.disabled = false;
+    updateSetupRunHint();
     return;
   }
   setTimeout(pollSetup, 1500);

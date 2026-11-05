@@ -90,7 +90,8 @@
         <div class="steps" id="setup-steps" style="margin-top:10px"></div>
         <div class="row" style="margin-top:10px">
           <button class="primary" id="setup-detect"><svg><use href="#i-search"/></svg>检测环境</button>
-          <button class="primary" id="setup-run" disabled><svg><use href="#i-download"/></svg>确认并自动配置</button>
+          <button class="primary" id="setup-run" disabled title="先点「检测环境」"><svg><use href="#i-download"/></svg>确认并自动配置</button>
+          <span class="field-note" id="setup-run-hint">先检测环境，再确认配置</span>
           <label class="field">人声分离
             <select id="setup-separation">
               <option value="auto">自动推荐</option>
@@ -107,6 +108,7 @@
       </div>
 
       <div class="grid cols-4" id="home-metrics" style="margin-top:14px"></div>
+          <div class="field-note" id="home-metrics-time"></div>
 
       <div class="card" style="margin-top:14px">
         <h3>进度 <span class="muted" id="home-progress-text"></span></h3>

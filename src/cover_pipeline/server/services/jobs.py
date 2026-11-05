@@ -37,11 +37,15 @@ def cancel_job(state: AppState, job_id: str) -> dict[str, Any]:
 
 
 def retry_job(state: AppState, job_id: str) -> dict[str, Any]:
-    """按原任务参数重跑一次（只支持 sing / oneclick / download / train / fix）。"""
-    job = state.jobs.get(job_id)
+    """按原任务参数重跑一次（只支持 sing / oneclick / download / train / fix）。
+
+    注意：`state.jobs.get()` 返回的是 `as_dict()`（dict，且不含 payload），
+    这里要读原始参数，所以走 `get_obj()` 拿 Job 对象。
+    """
+    job = state.jobs.get_obj(job_id)
     if not job:
         raise ValueError("任务不存在")
-    payload = getattr(job, "payload", None) or {}
+    payload = dict(job.payload or {})
     kind = job.kind
     if kind == "sing":
         return submit_sing(state, payload)

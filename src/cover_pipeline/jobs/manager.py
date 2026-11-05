@@ -105,6 +105,11 @@ class JobManager:
             job = self._jobs.get(job_id)
         return job.as_dict() if job else None
 
+    def get_obj(self, job_id: str) -> "Job | None":
+        """拿 Job 对象本身。as_dict() 里没有 payload，重跑这类场景要读原始参数。"""
+        with self._lock:
+            return self._jobs.get(job_id)
+
     def tail(self, job_id: str, lines: int = 80) -> str:
         job = self._jobs.get(job_id)
         if not job or not job.log_path:

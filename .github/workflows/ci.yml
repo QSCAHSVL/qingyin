@@ -30,6 +30,10 @@ jobs:
         env:
           PYTHONPATH: src
         run: python -m unittest discover -s tests -t .
+      - name: JS syntax
+        run: |
+          for f in src/cover_pipeline/server/static/*.js; do node --check "$f"; done
+
       - name: Packaging self-check
         env:
           PYTHONPATH: src

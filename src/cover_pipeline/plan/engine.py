@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from . import stats
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -100,6 +102,10 @@ def recommend(probe: dict[str, Any], profile: Profile, plans: list[dict[str, Any
             continue
 
         base = sum(float(plan.get("scores", {}).get(key, 3)) * weight for key, weight in weights.items())
+        try:
+            base = stats.adjust(str(plan.get("id") or ""), base)
+        except Exception:
+            pass
         notes: list[str] = []
 
         # 软调整
@@ -235,7 +241,9 @@ def fit_to_probe(probe: dict[str, Any], plans: list[dict[str, Any]] | None = Non
     显存刚好落在某套方案的区间里、且不是边界情况时，返回 None（用现成方案即可）。
     """
     plans = plans if plans is not None else load_plans()
-    vram = float((probe.get("gpu") or {}).get("vram_gb") or 0)
+    vram = _max_vram(probe)
+    if not vram:
+        vram = float((probe.get("gpu") or {}).get("vram_gb") or 0)
     if vram <= 0:
         return None
     usable = [p for p in plans if (p.get("for") or {}).get("gpu_required", True)]

@@ -1389,6 +1389,12 @@ _EXTRA_PATHS: dict[str, Any] = {
     },
     "/api/settings/send": {"post": {"summary": "保存外发配置（默认关闭）", "responses": {"200": {"description": "保存结果"}}}},
     "/api/train/config": {"get": {"summary": "读取训练配置与命令模板", "responses": {"200": {"description": "训练配置"}}}},
+    "/api/settings": {
+        "get": {"summary": "读取当前配置（隐藏敏感项）", "responses": {"200": {"description": "配置快照"}}},
+        "post": {"summary": "局部修改配置", "responses": {"200": {"description": "保存结果"}}},
+    },
+    "/api/train": {"post": {"summary": "提交一次训练任务", "responses": {"200": {"description": "任务对象"}}}},
+    "/api/train/preview": {"post": {"summary": "训练参数预览（不执行）", "responses": {"200": {"description": "预览结果"}}}},
 }
 
 

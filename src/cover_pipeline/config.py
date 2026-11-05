@@ -64,3 +64,38 @@ def resolve_path(cfg: dict[str, Any], key: str) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     project[key] = str(path)
     return path
+
+class ConfigError(ValueError):
+    """配置不合法时抛出，带字段路径，便于用户定位。"""
+
+
+_TYPES = {
+    "project": dict,
+    "separate": dict,
+    "convert": dict,
+    "mix": dict,
+    "clip": dict,
+    "train": dict,
+    "server": dict,
+    "send": dict,
+}
+
+
+def validate(data: dict) -> list[str]:
+    """最小 schema 校验：返回问题列表，空列表表示通过。"""
+    problems: list[str] = []
+    for key, expect in _TYPES.items():
+        if key in data and not isinstance(data[key], expect):
+            problems.append(f"{key} 应为对象，实际是 {type(data[key]).__name__}")
+    for path, expect in (("server.port", int), ("clip.seconds", (int, float)),
+                         ("separate.backend", str), ("convert.backend", str),
+                         ("train.epochs", int)):
+        node = data
+        for part in path.split("."):
+            if not isinstance(node, dict) or part not in node:
+                node = None
+                break
+            node = node[part]
+        if node is not None and not isinstance(node, expect):
+            problems.append(f"{path} 类型不对：{type(node).__name__}")
+    return problems

@@ -14,8 +14,12 @@
 | yt-dlp | 链接下载 | Unlicense | https://github.com/yt-dlp/yt-dlp |
 | PyTorch | 推理运行时 | BSD-3-Clause | https://pytorch.org |
 | Pretrained 权重（hubert / rmvpe / 预训练底模） | 转换与训练基础 | 见上游 RVC 仓库说明 | RVC 官方发布渠道 |
+| Inno Setup + ChineseSimplified.isl | 安装包编译 / 简体中文界面 | Inno Setup 许可（允许随安装包分发） | https://jrsoftware.org |
 
 模型权重由使用者自行准备（自己的声音、自己训练、自己承担授权责任）。本项目**不附带任何第三方音色模型**。
+
+安装包用的简体中文语言文件 `installer/Languages/ChineseSimplified.isl` 原样取自 Inno Setup 官方翻译分发包，
+只为让 CI 也能编译出中文安装包（CI 上临时装的 Inno Setup 不带这个文件）。
 
 ## 二、素材来源
 

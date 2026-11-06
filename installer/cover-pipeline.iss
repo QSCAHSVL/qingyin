@@ -1,4 +1,4 @@
-﻿; 卿音 安装包
+; 卿音 安装包
 ; 只装框架本身：RVC / UVR 复用本机已有环境，torch 等大依赖由 app 内「环境配置」按需安装。
 ; 编译：scripts\build-installer.ps1（需要 Inno Setup 6）
 
@@ -30,7 +30,9 @@ UninstallDisplayName={#AppName}
 ; 核心本体不到 1MB；大依赖（torch / 模型）不进安装包，由程序内「环境配置」按机器情况装
 
 [Languages]
-Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+; 简体中文语言包随仓库一起带（installer\Languages\），不依赖编译器装没装中文
+; —— CI 上 choco 装的 Inno Setup 只有默认语言，用 "compiler:Languages\ChineseSimplified.isl" 会直接编译失败
+Name: "chinesesimplified"; MessagesFile: "Languages\ChineseSimplified.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "创建桌面快捷方式"; GroupDescription: "附加任务："

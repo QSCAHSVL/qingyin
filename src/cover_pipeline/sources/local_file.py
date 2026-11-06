@@ -39,7 +39,18 @@ class LocalFileSource(SourceAdapter):
 
         search_dirs = [Path(p).expanduser() for p in (cfg.get("source", {}).get("search_dirs") or [])]
         if raw.is_dir():
-            search_dirs.insert(0, raw)
+            # 给的是目录：目录里只有一首就直接用；有多首就让人指定，别替人瞎猜
+            # （以前这里只把目录塞进 search_dirs，却拿「整个目录路径」去和文件名比，永远匹配不上）
+            inside = [p for p in raw.rglob("*") if p.is_file() and p.suffix.lower() in AUDIO_SUFFIXES]
+            if len(inside) == 1:
+                log.info(f"目录里只有一首，直接用：{inside[0].name}")
+                return inside[0].resolve()
+            if not inside:
+                raise SourceNotFound(f"目录里没有能用的音频文件：{raw}")
+            preview = "、".join(sorted(p.name for p in inside)[:3])
+            raise SourceNotFound(
+                f"目录里有 {len(inside)} 首（{preview}…），请指定具体文件，或者把歌名告诉我。"
+            )
 
         if not search_dirs:
             raise SourceNotFound(

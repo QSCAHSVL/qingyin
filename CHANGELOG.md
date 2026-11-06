@@ -1,5 +1,17 @@
 # 更新日志
 
+## 0.4.3 — 2026-11-06
+
+- 修复：`sources/local_file.py` 传「目录」当输入时永远匹配不上（代码把整个目录路径拿去和文件名比）。
+  现在目录里只有一首就直接用，多首就明确报错让人指定
+- 测试：71 → 122 条。新增资源库索引、服务层小工具、方案写入、配方库、本地音源、混音六块
+- 文档：README 补「文档」索引（此前有 6 篇 docs 没有任何地方链接）；英文 README 重写到与中文版对齐；
+  中文版「界面」一节补上训练 / 日志 / 设置三个页面
+- 打包：`scripts/build-installer.ps1` 改成一条命令出「绿色版 zip + 安装包」。
+  以前它调的 `portable.ps1` 产出 `dist/cover-pipeline-portable`，而 iss 的源目录是 `dist/卿音-<版本>-portable`，
+  两边对不上必然编译失败；顺手修了 PS 5.1 读中文脚本要 UTF-8 BOM 的坑
+- 发布：新增 `.github/workflows/release.yml` —— 推 `v*` 标签就自动打包并上传 Release 资产（含 `SHA256SUMS.txt`）
+
 ## 0.4.2 — 2026-11-06
 
 - 重构：后端 `server/app.py` 1605 → 391 行，业务搬到 `server/services/*.py`，接口描述抽到 `server/openapi.py`

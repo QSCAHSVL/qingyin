@@ -109,7 +109,7 @@ explain: "一句话解释"
 
 ## 界面
 
-`cover serve` 起一个本地网页（http://127.0.0.1:7801），左侧八个入口：
+`cover serve` 起一个本地网页（http://127.0.0.1:7801），左侧十个入口：
 
 - **开始**：一键翻唱（输歌名 → 自动找源 → 下载 → 翻唱）+ 五步引导（检查环境 → 接上本机 RVC/UVR → 选方案 → 准备模型 → 出第一首）
 - **找歌**：B站 / iTunes / 网易云 / QQ音乐 四个平台一起搜；能下的直接「下载并翻唱」，只能给信息的会标「仅信息」并给「打开页面」「怎么用？」
@@ -118,6 +118,9 @@ explain: "一句话解释"
 - **资源库**：模型 / 工程 / 成品 / 音源 / 收藏；点一行看详情，能试听、收藏、删除（挪到 `work/_trash`，不真删）
 - **诊断**：6 类症状（接缝杂音、人声发闷、爆音削波、人声发干、伴奏盖人声、音色不像），每类 2~3 个解法，可以勾选多个一起跑对比
 - **方案**：11 套内置方案，可按显存预算过滤，写入后能一键撤销回默认
+- **训练**：素材目录 + 预检（总时长 / 段数 / 预计耗时 / 警告）、参数、开始训练；训完自动登记成新版本，可回滚
+- **日志**：服务端日志与任务日志，按行数看尾部，不用去翻文件
+- **设置**：三个数据目录（试写校验）、发布配置、备份
 - **API**：接口一览页（`/docs`），GET 都能「试一下」；外部 Agent 接入见下
 
 界面只用标准库（`http.server`）加原生 JS，不依赖 FastAPI/uvicorn，也不用打包。
@@ -192,6 +195,22 @@ scripts/            安装脚本
 | 4G | 仅推理 |
 
 CPU 也能跑，但慢很多，不建议训练。
+
+## 文档
+
+| 想知道什么 | 看这个 |
+|---|---|
+| 15 分钟跑通第一次翻唱 | [QUICKSTART.md](docs/QUICKSTART.md) |
+| 环境怎么一键配好 / 各组件下多大 | [SETUP.md](docs/SETUP.md)、[ASSETS.md](docs/ASSETS.md) |
+| 参数怎么选、为什么这么选 | [PLANS.md](docs/PLANS.md) |
+| 训练自己的音色模型、版本怎么管 | [TRAIN.md](docs/TRAIN.md)、[MODELS.md](docs/MODELS.md) |
+| 音源怎么接别的平台 | [SOURCES.md](docs/SOURCES.md)、[PROVIDERS.md](docs/PROVIDERS.md) |
+| 怎么打包发版 | [PACKAGING.md](docs/PACKAGING.md) |
+| 版权与风险边界 | [DISCLAIMER.md](docs/DISCLAIMER.md)、[RISK.md](docs/RISK.md) |
+| 这个项目是怎么长出来的 | [JOURNAL.md](docs/JOURNAL.md)（决策与踩坑流水）、[REVIEW.md](docs/REVIEW.md) |
+| 接手继续开发 | [NEXT-SESSION.md](docs/NEXT-SESSION.md)、[PLAN.md](docs/PLAN.md) |
+
+> [FINAL-PLAN.md](docs/FINAL-PLAN.md) 是最早的整体规划，部分条目已过时，只作历史参考。
 
 ## 许可
 

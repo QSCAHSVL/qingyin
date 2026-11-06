@@ -3,16 +3,17 @@
 > 这份文件是给「接手的人」看的：读完就能接着干，不用翻聊天记录。
 > 路径约定：`<repo>` 指仓库根目录（本项目所在目录），一律不写本机绝对路径——这个文件会进发布包。
 
-## 现在的状态（2026-11-06 04:0x）
+## 现在的状态（2026-11-06 15:0x）
 
-- 仓库：https://github.com/QSCAHSVL/qingyin ，第 6、7 轮已提交并 push 到 origin/main，CI 全绿
+- 仓库：https://github.com/QSCAHSVL/qingyin ，第 6～7 轮 + 复审 + 收尾都已在 origin/main，CI 全绿
 - 本地：`<repo>`，工作区干净，与 origin/main 同步
-- 测试：59 条全绿（`PYTHONPATH=src py -3 -m unittest discover -s tests -t .`）
+- 测试：122 条全绿（`PYTHONPATH=src py -3 -m unittest discover -s tests -t .`）
 - 前端静态检查：`py -3 scripts/check_frontend.py`（语法 + import 路径 + export 名，16 个文件 0 问题）
-- 版本：0.4.2；`dist/` 里有 `卿音-0.4.2-portable.zip` 与 `卿音-0.4.2-setup.exe`
-- 本机跑着网页界面的进程（`127.0.0.1:7801`）：静态文件是按请求读盘的，改完刷新即可，不用重启
+- 版本：0.4.3；打包一条命令：`scripts\build-installer.ps1`（出 `dist/卿音-0.4.3-portable.zip` + `-setup.exe`）
+- 发版：`git tag v0.4.3 && git push origin v0.4.3` → GitHub Actions 自动打包并上传 Release 资产
+- 本机跑着网页界面的进程（`127.0.0.1:7801`）：静态文件是按请求读盘的，改完刷新即可；改了后端要重启进程
 
-## 已完成（七轮）
+## 已完成（八轮）
 
 1. 版本单一来源 `scripts/sync_version.py`（CI `--check`）、ruff 非阻断、Release 重建、安装包实测
 2. 方案引擎闭环：`plan/stats.py` 实测回写 + `plan/heal.py` 失败自愈，已接进 `jobs/manager._record_plan_stat`
@@ -24,6 +25,9 @@
 8. 拆 `static/app.js`：1917 行 → `core.js` + `nav.js` + `router.js` + `pages/*.js`(10) + `ui/*.js`(2)，
    原生 ES module，`index.html` 改成 `<script type="module" src="/static/app.js?v=10">`
 9. 修 `POST /api/jobs/{id}/retry` 必然 500（`JobManager.get()` 返回 dict 且不含 payload），补 4 条回归测试
+10. 复审：修 `core/pitch.py` 的 NameError（整首移调必崩）；`pyproject` 的 ruff `target-version` 修好；ruff 130 → 0 并转成 CI 阻断
+11. 收尾：README 文档索引 + 英文 README 重写；测试 71 → 122（资源库/服务层/方案写入/配方/本地音源/混音）；
+    打包合成一条命令；新增 Release 工作流
 
 ## 第 6 轮拆完的后端结构（动 `app.py` 之前先看这个）
 
@@ -76,10 +80,12 @@ static/
 
 ## 下一轮任务
 
-### 第 8 轮：上真机 + 发布
-- 真机：Demucs 装一遍（约 2GB 模型）跑一首，确认 `separate.backend=demucs`
-- 安装包交互：开始菜单、桌面图标、卸载残留（`dist/卿音-0.4.2-setup.exe` 已重出，需人工点一遍）
-- 可选：前端再加一层「页面模块按需 import」（现在是一次性全载，好处是简单、坏处是首屏多拉十几 KB）
+### 第 9 轮：上真机 + 补最后的空白
+- 真机：Demucs 装一遍（约 2GB 模型）跑一首，确认 `separate.backend=demucs`（代码路径在，没跑过）
+- 安装包交互：开始菜单、桌面图标、卸载残留（`dist/卿音-0.4.3-setup.exe`，需人工点一遍）
+- 示例音频：仓库里一条试听样例都没有（`examples/` 不存在，git 里也没有 wav/mp3），新人看不到效果
+- 可选：前端把页面模块改成按需 `import`（现在是全量载入，首屏多拉十几 KB）
+- 可选：`core/convert.py`（RVC 命令拼装）目前只靠真机验证，可以像 `core/mix.py` 那样把 ffmpeg/子进程打桩补测试
 
 ## 开工前先做
 
@@ -88,17 +94,20 @@ cd <repo>
 $env:PYTHONPATH = "$PWD\src"
 py -3 -m unittest discover -s tests -t .
 py -3 scripts/check_frontend.py
+py -3 -m ruff check src tests
 ```
 
-## 打包（会做隐私扫描，写文档时别带本机绝对路径）
+## 打包与发版
 
 ```powershell
-py -3 scripts/package.py                 # 绿色版目录 + zip（dist/卿音-<版本>-portable*）
-& "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe" installer\cover-pipeline.iss
+scripts\build-installer.ps1                 # 一条命令：绿色版 zip + Inno 安装包（需要 Inno Setup 6）
+scripts\build-installer.ps1 -SkipInstaller  # 只出绿色版
+git tag v0.4.3; git push origin v0.4.3      # 推标签 → Release 工作流自动打包上传
 ```
 
 > `package.py` 会扫 `[A-Z]:\` 这种个人盘路径，命中就中止——文档里一律用 `<repo>` 之类的相对写法。
-> `installer/cover-pipeline.iss` 的 `AppSource` 已经跟版本号联动，改版本只需改 `__init__.py` 再跑 `sync_version.py`。
+> `installer/cover-pipeline.iss` 的 `AppSource` 跟版本号联动，改版本只需改 `__init__.py` 再跑 `sync_version.py`。
+> `scripts/build-installer.ps1` 里有中文，**改动后必须存成 UTF-8 with BOM**，否则 PowerShell 5.1 会解析成乱码。
 
 ## 可复用的验证脚本（都在仓库外，没提交）
 

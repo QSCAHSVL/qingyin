@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 
+**中文** ｜ [English](README.en.md)
 
 > 本地翻唱流水线：找歌 → 人声分离 → 音色转换 → 混音出片，全在本机跑。
 

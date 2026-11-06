@@ -202,3 +202,28 @@ CI 里原来那条 `Get-ChildItem static/*.js | node --check` 拆包后既漏子
 一个坑记下来：`git status` 里 `app.js` 显示 `M`、其余都是 `??`，`git add` 时必须显式带上
 `static/pages/ static/ui/ static/core.js static/nav.js static/router.js`，否则打包只会带上旧的 `app.js`，
 页面一打开就是 `import` 404。
+
+### 十三、15:0x 0.4.3：补测试、补文档、打包合一条、发版上工作流
+
+前几轮把结构拆干净了，这轮补「用起来会不会踩坑」的空白。
+
+**真 bug**：`sources/local_file.py` 收目录当输入时永远匹配不上——代码把整个目录路径当查询词，
+去和文件名做相似度比较，得分恒为 0。现在改成：目录里只有一首就直接用，多首就明确报错让人指定。
+
+**测试 71 → 122**：新增六块 —— 资源库索引（扫描/查询/收藏/软删除/统计）、方案写入（深合并 + 不丢用户配置 + 备份）、
+配方库（读取/推荐/决策记录）、本地音源（打分 + 各种报错路径）、混音（增益换算 + ffmpeg 打桩）、
+服务层小工具。写测试时又逼出上面那个目录 bug，算是测试的正反馈。
+
+**文档**：README 加了「文档」索引表——之前 16 篇 docs 里有 6 篇没有任何地方链过去，等于藏起来了。
+英文 README 从 51 行重写到和中文版对齐（也加了文档索引、命令表、界面十页、Agent 接口示例）。
+中文版「界面」一节原来还写着「八个入口」，其实已经有十个（补了训练/日志/设置）。
+
+**打包**：`scripts/build-installer.ps1` 以前调 `portable.ps1`，产出 `dist/cover-pipeline-portable`，
+而 iss 的 `AppSource` 早就跟版本号联动成 `dist/卿音-<版本>-portable` —— 两边对不上，这条命令从来就没人跑通过。
+现在改成：读版本 → sync_version → `package.py`（带隐私扫描）→ 解压到版本目录 → ISCC，一条命令出两个包。
+顺带踩到 PS 5.1 的老坑：含中文的 .ps1 必须存成 UTF-8 **with BOM**，否则整段被当 ANSI 解析成乱码、直接报语法错。
+
+**发版**：新增 `.github/workflows/release.yml`，推 `v*` 标签就自动构建 + 上传 zip/exe/SHA256SUMS。
+第一次跑就挂了：choco 装的 Inno Setup 只有默认语言，`[Languages]` 里 `compiler:Languages\ChineseSimplified.isl`
+找不到文件。修法是把那份 .isl 随仓库带上（`installer/Languages/`），本地和 CI 用同一份；
+第二次跑全绿，Release 自动出好。教训：**本地能编不等于 CI 能编，第三方编译器的资源文件要自己带**。

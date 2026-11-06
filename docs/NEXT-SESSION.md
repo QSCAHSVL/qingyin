@@ -9,8 +9,10 @@
 - 本地：`<repo>`，工作区干净，与 origin/main 同步
 - 测试：122 条全绿（`PYTHONPATH=src py -3 -m unittest discover -s tests -t .`）
 - 前端静态检查：`py -3 scripts/check_frontend.py`（语法 + import 路径 + export 名，16 个文件 0 问题）
-- 版本：0.4.3；打包一条命令：`scripts\build-installer.ps1`（出 `dist/卿音-0.4.3-portable.zip` + `-setup.exe`）
-- 发版：`git tag v0.4.3 && git push origin v0.4.3` → GitHub Actions 自动打包并上传 Release 资产
+- 版本：0.4.3，已发 Release（`qingyin-0.4.3-portable.zip` / `-setup.exe` / `SHA256SUMS.txt` 由工作流自动上传）
+- 打包：`scripts\build-installer.ps1` 一条命令出 zip + 安装包
+- 发版：`git tag v0.4.3 && git push origin v0.4.3` → `.github/workflows/release.yml` 自动打包并上传资产
+  （首跑踩过：CI 上 choco 装的 Inno Setup 不带中文语言文件，已把 `installer/Languages/ChineseSimplified.isl` 收进仓库）
 - 本机跑着网页界面的进程（`127.0.0.1:7801`）：静态文件是按请求读盘的，改完刷新即可；改了后端要重启进程
 
 ## 已完成（八轮）

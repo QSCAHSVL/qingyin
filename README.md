@@ -206,6 +206,7 @@ CPU 也能跑，但慢很多，不建议训练。
 | 参数怎么选、为什么这么选 | [PLANS.md](docs/PLANS.md) |
 | 训练自己的音色模型、版本怎么管 | [TRAIN.md](docs/TRAIN.md)、[MODELS.md](docs/MODELS.md) |
 | 音源怎么接别的平台 | [SOURCES.md](docs/SOURCES.md)、[PROVIDERS.md](docs/PROVIDERS.md) |
+| 装完怎么验收（安装包/真机） | [ACCEPTANCE.md](docs/ACCEPTANCE.md) |
 | 怎么打包发版 | [PACKAGING.md](docs/PACKAGING.md) |
 | 版权与风险边界 | [DISCLAIMER.md](docs/DISCLAIMER.md)、[RISK.md](docs/RISK.md) |
 | 这个项目是怎么长出来的 | [JOURNAL.md](docs/JOURNAL.md)（决策与踩坑流水）、[REVIEW.md](docs/REVIEW.md) |
